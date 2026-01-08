@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Premium Leather Color Palette */
+            --primary-dark: #2D1F0F;
+            --primary-brown: #8B6F47;
+            --accent-gold: #D4AF37;
+            --neutral-cream: #F5F3F0;
+            --dark-charcoal: #1A1410;
+            --accent-burgundy: #C41E3A;
+            --border-light: #E8E4E0;
+            
+            /* Legacy colors (kept for compatibility) */
+            --cognac: #B8860B;
+            --burgundy: #722F37;
+            --charcoal: #36454F;
+            --cream: #F5F5DC;
+            --saddle-brown: #8B4513;
+            --forest-green: #355E3B;
+            --soft-gold: #DAA520;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--neutral-cream);
+            color: var(--primary-dark);
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+        
+        .font-display { 
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .font-accent { font-family: 'Crimson Text', serif; }
+        
+        /* Enhanced Typography System */
+        h1 { font-size: 3.5rem; line-height: 1.1; font-weight: 700; }
+        h2 { font-size: 2.25rem; line-height: 1.2; font-weight: 600; }
+        h3 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; }
+        h4 { font-size: 1.25rem; line-height: 1.4; font-weight: 600; }
+        p { font-size: 1rem; line-height: 1.65; }
+        
+        .hero-bg {
+            background-image: url('resources/hero-leather-workshop.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+            overflow: hidden;
+            min-height: 60vh;
+        }
+        
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(45, 31, 15, 0.5) 0%, rgba(45, 31, 15, 0.3) 100%);
+            z-index: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-brown) 0%, #7A5C35 100%);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(139, 111, 71, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A08155 0%, #8B6F47 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 111, 71, 0.35);
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-dark);
+            border: 2px solid var(--primary-brown);
+            padding: 0.875rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-brown);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 111, 71, 0.3);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            color: var(--primary-dark);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-burgundy);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .cart-counter {
+            background: var(--accent-burgundy);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--primary-brown);
+            border-radius: 50%;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% - 1rem);
+            background: linear-gradient(to bottom, var(--primary-brown), transparent);
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .reveal-element.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .material-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(184, 134, 11, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .material-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(184, 134, 11, 0.15);
+        }
+        
+        .process-step {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(184, 134, 11, 0.1);
+        }
+        
+        .process-number {
+            background: linear-gradient(135deg, var(--cognac) 0%, var(--saddle-brown) 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .navbar-solid {
+            background: white !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .navbar-solid .nav-brand {
+            color: var(--primary-dark);
+            text-shadow: none;
+        }
+        
+        .navbar-solid .nav-link {
+            color: var(--primary-dark) !important;
+            text-shadow: none;
+        }
+        
+        .navbar-solid .nav-icon {
+            color: var(--primary-dark);
+            text-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 navbar-solid transition-all duration-300 ease-out">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-display font-bold nav-brand">PakMegaMart</h1>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link font-medium">Home</a>
+                    <a href="products.html" class="nav-link font-medium">Products</a>
+                    <a href="about.html" class="nav-link font-medium">About</a>
+                    <a href="#contact" class="nav-link font-medium">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 nav-icon hover:opacity-80 transition-opacity" onclick="toggleCart()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
+                        </svg>
+                        <span class="cart-counter" id="cartCounter">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Our Story -->
+    <section id="story" class="pt-24 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h3 class="text-4xl font-display font-bold text-gray-900 mb-4">Our Story</h3>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">A journey through four decades of passion, tradition, and excellence in leather craftsmanship.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                <div class="reveal-element">
+                    <h4 class="text-3xl font-display font-bold text-gray-900 mb-6">Rooted in Heritage</h4>
+                    <p class="text-lg text-gray-700 mb-6 leading-relaxed">
+                        PakMegaMart was born from a deep commitment to quality and integrity—values deeply rooted in Pakistani tradition. Inspired by the rich leatherworking heritage of Karachi and Lahore, our founder Hassan Malik brought together master craftsmen to create wallets that reflect our national pride in exceptional craftsmanship. Each piece is created with the same dedication our forefathers applied to their work.
+                    </p>
+                    <p class="text-lg text-gray-700 mb-6 leading-relaxed">
+                        In 2018, Hassan established our atelier with a vision to honor the time-tested techniques of traditional Pakistani leatherwork while bringing global quality standards. We believe in creating products that can be passed down through families—true heirlooms that carry the dignity and respect our culture holds dear.
+                    </p>
+                    <p class="font-accent italic text-xl text-cognac">
+                        "ہر ٹانکا ایک کہانی ہے، ہر چمڑا اپنی شان رکھتا ہے۔ ہمارا کام یہ شان کو احترام سے بحال رکھنا ہے۔" (Every stitch is a story; every leather has its own dignity. Our duty is to honor that with respect.)
+                    </p>
+                    <p class="text-sm text-gray-600 mt-2">- Hassan Malik, Founder</p>
+                </div>
+                
+                <div class="reveal-element">
+                    <div class="space-y-4">
+                        <img src="resources/craft-handmade-1.jpg" alt="Traditional craftsmanship" class="w-full h-48 object-cover rounded-lg shadow-lg">
+                        <img src="resources/craft-process-1.jpg" alt="Leather working process" class="w-full h-48 object-cover rounded-lg shadow-lg">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timeline -->
+            <div class="reveal-element">
+                <h4 class="text-3xl font-display font-bold text-gray-900 mb-8 text-center">Our Journey</h4>
+                <div class="max-w-4xl mx-auto">
+                    <div class="timeline-item mb-8">
+                        <h5 class="text-xl font-display font-semibold text-gray-900 mb-2">2018 - ہمارا آغاز (The Beginning)</h5>
+                        <p class="text-gray-700">Hassan Malik establishes PakMegaMart in Karachi, uniting master craftsmen to bring world-class leather goods to Pakistan and the world, honoring our nation's artisanal heritage.</p>
+                    </div>
+                    
+                    <div class="timeline-item mb-8">
+                        <h5 class="text-xl font-display font-semibold text-gray-900 mb-2">2019 - قومی معیار (National Quality Standards)</h5>
+                        <p class="text-gray-700">We source premium leather from certified tanneries across Pakistan, ensuring ethical practices and supporting local industries while maintaining international quality benchmarks.</p>
+                    </div>
+                    
+                    <div class="timeline-item mb-8">
+                        <h5 class="text-xl font-display font-semibold text-gray-900 mb-2">2020 - نئی نسل (Next Generation Training)</h5>
+                        <p class="text-gray-700">Our apprenticeship program launches, training young Pakistani craftsmen in time-honored techniques, ensuring our heritage continues to thrive for generations to come.</p>
+                    </div>
+                    
+                    <div class="timeline-item mb-8">
+                        <h5 class="text-xl font-display font-semibold text-gray-900 mb-2">2021 - ماحول دوست (Eco-Conscious Practices)</h5>
+                        <p class="text-gray-700">We commit to sustainable practices, using responsibly sourced materials and minimalist packaging, reflecting our values of respect for nature and future generations.</p>
+                    </div>
+                    
+                    <div class="timeline-item mb-8">
+                        <h5 class="text-xl font-display font-semibold text-gray-900 mb-2">2023 - جدید رابطہ (Modern Connection)</h5>
+                        <p class="text-gray-700">Launch of our digital platform, bringing traditional Pakistani craftsmanship to customers across Pakistan and beyond, while staying true to our artisanal values.</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h5 class="text-xl font-display font-semibold text-gray-900 mb-2">2026 - حکمت اور عمل (Wisdom & Excellence)</h5>
+                        <p class="text-gray-700">Today, our team of 35+ master craftsmen continues creating exceptional leather wallets that represent the best of Pakistani craftsmanship, earning trust from customers across the nation and abroad.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Craftsmanship Process -->
+    <section class="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h3 class="text-4xl font-display font-bold text-gray-900 mb-4">The Art of Craftsmanship</h3>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Every wallet undergoes a meticulous process that combines centuries-old techniques with modern precision.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="process-step rounded-2xl p-6 text-center reveal-element">
+                    <div class="process-number mx-auto mb-4">1</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-3">Selection</h4>
+                    <p class="text-gray-700">We carefully select only the finest full-grain hides from our trusted Italian tanneries, ensuring perfect texture and durability.</p>
+                </div>
+                
+                <div class="process-step rounded-2xl p-6 text-center reveal-element">
+                    <div class="process-number mx-auto mb-4">2</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-3">Cutting</h4>
+                    <p class="text-gray-700">Each piece is hand-cut using traditional patterns, with our artisans carefully working around natural markings to showcase the leather's character.</p>
+                </div>
+                
+                <div class="process-step rounded-2xl p-6 text-center reveal-element">
+                    <div class="process-number mx-auto mb-4">3</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-3">Stitching</h4>
+                    <p class="text-gray-700">Using waxed linen thread and traditional saddle stitching, our artisans create seams that are both beautiful and incredibly strong.</p>
+                </div>
+                
+                <div class="process-step rounded-2xl p-6 text-center reveal-element">
+                    <div class="process-number mx-auto mb-4">4</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-3">Finishing</h4>
+                    <p class="text-gray-700">Edges are hand-burnished to a smooth finish, and the entire piece is treated with natural oils to enhance the leather's natural beauty.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Materials Showcase -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h3 class="text-4xl font-display font-bold text-gray-900 mb-4">Premium Materials</h3>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">We source only the finest materials from around the world, ensuring every wallet meets our exacting standards.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="material-card rounded-2xl p-8 reveal-element">
+                    <div class="w-16 h-16 bg-cognac rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-4">Italian Full-Grain Leather</h4>
+                    <p class="text-gray-700 mb-4">Sourced from the renowned tanneries of Santa Croce sull'Arno, our vegetable-tanned leather develops a rich patina over time, becoming more beautiful with each use.</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 100% vegetable-tanned</li>
+                        <li>• Full-grain construction</li>
+                        <li>• 25-year durability guarantee</li>
+                        <li>• Ethically sourced hides</li>
+                    </ul>
+                </div>
+                
+                <div class="material-card rounded-2xl p-8 reveal-element">
+                    <div class="w-16 h-16 bg-burgundy rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-4">Waxed Linen Thread</h4>
+                    <p class="text-gray-700 mb-4">Our traditional waxed linen thread is coated with beeswax for added strength and water resistance, ensuring your wallet's seams remain secure for decades.</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Natural beeswax coating</li>
+                        <li>• Superior tensile strength</li>
+                        <li>• UV resistant colors</li>
+                        <li>• Traditional saddle stitch ready</li>
+                    </ul>
+                </div>
+                
+                <div class="material-card rounded-2xl p-8 reveal-element">
+                    <div class="w-16 h-16 bg-forest-green rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-4">Natural Edge Finishes</h4>
+                    <p class="text-gray-700 mb-4">We use traditional edge finishing techniques, including hand-burnishing with natural waxes and dyes, creating smooth, durable edges that resist wear.</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Hand-burnished edges</li>
+                        <li>• Natural wax finishes</li>
+                        <li>• Multi-layer dye process</li>
+                        <li>• Superior moisture resistance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Artisan Profiles -->
+    <section class="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h3 class="text-4xl font-display font-bold text-gray-900 mb-4">Meet Our Master Artisans</h3>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">The skilled craftspeople who bring our wallets to life, each with decades of experience and a passion for excellence.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="material-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="w-24 h-24 bg-cognac rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">MB</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-2">Marco Benedetti</h4>
+                    <p class="text-cognac font-medium mb-4">Master Craftsman & Founder</p>
+                    <p class="text-gray-700 mb-4">40+ years of experience. Trained in traditional Tuscan techniques. Specializes in complex wallet constructions and exotic leathers.</p>
+                    <p class="font-accent italic text-gray-600">"Every piece of leather has a soul. Our job is to reveal it."</p>
+                </div>
+                
+                <div class="material-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="w-24 h-24 bg-burgundy rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">AS</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-2">Anna Santori</h4>
+                    <p class="text-burgundy font-medium mb-4">Senior Leather Artisan</p>
+                    <p class="text-gray-700 mb-4">25 years of experience. Expert in edge finishing and hand-stitching. Known for her meticulous attention to detail and precision work.</p>
+                    <p class="font-accent italic text-gray-600">"Perfection is in the details. Every stitch must be perfect."</p>
+                </div>
+                
+                <div class="material-card rounded-2xl p-8 text-center reveal-element">
+                    <div class="w-24 h-24 bg-forest-green rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">DL</div>
+                    <h4 class="text-xl font-display font-semibold text-gray-900 mb-2">David Liu</h4>
+                    <p class="text-forest-green font-medium mb-4">Quality Inspector & Finisher</p>
+                    <p class="text-gray-700 mb-4">15 years of experience. Final quality control and finishing. Ensures every wallet meets our exacting standards before shipment.</p>
+                    <p class="font-accent italic text-gray-600">"Quality is not negotiable. Every piece must be perfect."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sustainability -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h3 class="text-4xl font-display font-bold text-gray-900 mb-4">Sustainable Craftsmanship</h3>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">We're committed to preserving both traditional techniques and our planet for future generations.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="reveal-element">
+                    <h4 class="text-3xl font-display font-bold text-gray-900 mb-6">Environmental Responsibility</h4>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-cognac rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-gray-900 mb-2">Vegetable Tanning Process</h5>
+                                <p class="text-gray-700">We use only traditional vegetable tanning methods, avoiding harmful chemicals and reducing environmental impact.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-burgundy rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-gray-900 mb-2">Ethical Sourcing</h5>
+                                <p class="text-gray-700">All our leather comes from ethically raised animals, with full traceability from farm to finished product.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-gray-900 mb-2">Sustainable Packaging</h5>
+                                <p class="text-gray-700">Our packaging uses recycled materials and biodegradable components, minimizing waste and environmental impact.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-soft-gold rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-gray-900 mb-2">Lifetime Durability</h5>
+                                <p class="text-gray-700">Our commitment to quality means our products last decades, reducing consumption and waste in the long term.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="reveal-element">
+                    <img src="resources/craft-detail-stitching-1.jpg" alt="Sustainable craftsmanship" class="w-full h-96 object-cover rounded-2xl shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-white py-16 border-t" style="background-color: #0f0f0f; border-color: #1a1a1a;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <!-- About -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">About PakMegaMart</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Crafting premium leather goods since 1985. Dedicated to timeless quality and exceptional craftsmanship.</p>
+                </div>
+                
+                <!-- Customer Service -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">Customer Service</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Shipping Info</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Company -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">Company</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="about.html" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Our Story</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Shipping Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Return Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Bottom Section -->
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <h2 class="text-xl font-display font-bold mb-2">PakMegaMart</h2>
+                        <p class="text-gray-500 text-sm">Premium Quality • Handcrafted Excellence</p>
+                    </div>
+                    <p class="text-gray-500 text-sm">© 2025 PakMegaMart. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Panel -->
+    <div id="cartPanel" class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-40">
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between p-6 border-b">
+                <h3 class="text-xl font-display font-semibold">Shopping Cart</h3>
+                <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="cartItems" class="space-y-4">
+                    <!-- Cart items will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="border-t p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-semibold">Total:</span>
+                    <span class="text-2xl font-bold text-gray-900" id="cartTotal">$0.00</span>
+                </div>
+                <button class="w-full btn-primary py-3 rounded-lg font-semibold text-lg" onclick="checkout()">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" onclick="toggleCart()"></div>
+
+    <script src="main.js"></script>
+</body>
+</html>

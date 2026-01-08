@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Products - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <link href="https://unpkg.com/splitting@1.0.6/dist/splitting.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Premium Leather Color Palette */
+            --primary-dark: #2D1F0F;
+            --primary-brown: #8B6F47;
+            --accent-gold: #D4AF37;
+            --neutral-cream: #F5F3F0;
+            --dark-charcoal: #1A1410;
+            --accent-burgundy: #C41E3A;
+            --border-light: #E8E4E0;
+            
+            /* Legacy colors (kept for compatibility) */
+            --cognac: #B8860B;
+            --burgundy: #722F37;
+            --charcoal: #36454F;
+            --cream: #F5F5DC;
+            --saddle-brown: #8B4513;
+            --forest-green: #355E3B;
+            --soft-gold: #DAA520;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--neutral-cream);
+            color: var(--primary-dark);
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+        
+        .font-display { 
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .font-accent { font-family: 'Crimson Text', serif; }
+        
+        /* Enhanced Typography System */
+        h1 { font-size: 3.5rem; line-height: 1.1; font-weight: 700; }
+        h2 { font-size: 2.25rem; line-height: 1.2; font-weight: 600; }
+        h3 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; }
+        h4 { font-size: 1.25rem; line-height: 1.4; font-weight: 600; }
+        p { font-size: 1rem; line-height: 1.65; }
+        
+        .hero-bg {
+            background-image: url('resources/hero-leather-workshop.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(45, 31, 15, 0.5) 0%, rgba(45, 31, 15, 0.3) 100%);
+            z-index: 1;
+        }
+        
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(139, 111, 71, 0.15);
+        }
+        
+        .product-card img {
+            height: 280px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        .discount-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--accent-burgundy);
+            color: white;
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            z-index: 10;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-brown) 0%, #7A5C35 100%);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(139, 111, 71, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A08155 0%, #8B6F47 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 111, 71, 0.35);
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-dark);
+            border: 2px solid var(--primary-brown);
+            padding: 0.875rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-brown);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 111, 71, 0.3);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            color: var(--primary-dark);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-burgundy);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .cart-counter {
+            background: var(--accent-burgundy);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+        
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .reveal-element.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .product-info {
+            background: white;
+        }
+        
+        .product-title {
+            color: var(--primary-dark);
+        }
+        
+        .product-description {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .original-price {
+            color: #999;
+            text-decoration: line-through;
+        }
+        
+        .current-price {
+            color: var(--accent-burgundy);
+            font-weight: 700;
+        }
+        
+        .btn-quick-view {
+            width: 100%;
+        }
+        
+        .modal {
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background: white;
+            animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .navbar-solid {
+            background: white !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .navbar-solid .nav-brand {
+            color: var(--primary-dark);
+            text-shadow: none;
+        }
+        
+        .navbar-solid .nav-link {
+            color: var(--primary-dark) !important;
+            text-shadow: none;
+        }
+        
+        .navbar-solid .nav-icon {
+            color: var(--primary-dark);
+            text-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 navbar-solid transition-all duration-300 ease-out">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-display font-bold nav-brand">PakMegaMart</h1>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link font-medium">Home</a>
+                    <a href="products.html" class="nav-link font-medium">Products</a>
+                    <a href="about.html" class="nav-link font-medium">About</a>
+                    <a href="#contact" class="nav-link font-medium">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 nav-icon hover:opacity-80 transition-opacity" onclick="toggleCart()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
+                        </svg>
+                        <span class="cart-counter" id="cartCounter">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="pb-12 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center reveal-element">
+                <h2 class="text-5xl font-display font-bold text-gray-900 mb-4">Our Collection</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Discover our complete range of handcrafted leather wallets, each piece representing the pinnacle of artisanal craftsmanship.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Product Grid -->
+                <div class="lg:w-full">
+                    <div class="flex justify-between items-center mb-8">
+                        <p class="text-gray-600" id="productCount">Showing all products</p>
+                        <select class="border border-gray-300 rounded-lg px-4 py-2" onchange="sortProducts(this.value)">
+                            <option value="name">Sort by Name</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="newest">Newest First</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="productGrid">
+                        <!-- Products will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <!-- Quick View Modal -->
+    <div id="quickViewModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/50" onclick="if(event.target === this) closeQuickView()">
+        <div class="modal-content w-full max-w-4xl bg-white rounded-2xl shadow-2xl">
+            <div class="flex flex-col lg:flex-row">
+                <div class="lg:w-1/2 p-6">
+                    <img id="modalImage" src="" alt="" class="w-full h-96 object-cover rounded-lg">
+                </div>
+                <div class="lg:w-1/2 p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 id="modalTitle" class="text-2xl font-display font-bold text-gray-900"></h3>
+                        <button onclick="closeQuickView()" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p id="modalPrice" class="text-3xl font-bold text-gray-900 mb-4"></p>
+                    <p id="modalDescription" class="text-gray-700 mb-6"></p>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Color</label>
+                            <select id="modalColor" class="w-full border border-gray-300 rounded-lg px-4 py-2" onchange="updateProductImage()">
+                                <option value="black">Black</option>
+                                <option value="brown">Brown</option>
+                                <option value="gray">Gray</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 mb-2">Quantity</label>
+                            <div class="flex items-center space-x-3">
+                                <button class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center" onclick="changeQuantity(-1)">-</button>
+                                <input type="number" id="modalQuantity" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2">
+                                <button class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center" onclick="changeQuantity(1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="modalAddToCart" class="w-full btn-primary py-3 rounded-lg font-semibold text-lg">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Cart Panel -->
+    <div id="cartPanel" class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between p-6 border-b">
+                <h3 class="text-xl font-display font-semibold">Shopping Cart</h3>
+                <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="cartItems" class="space-y-4">
+                    <!-- Cart items will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="border-t p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-semibold">Total:</span>
+                    <span class="text-2xl font-bold text-gray-900" id="cartTotal">PKR 0.00</span>
+                </div>
+                <button class="w-full btn-primary py-3 rounded-lg font-semibold text-lg" onclick="checkout()">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+
+    <!-- Mini Cart Preview -->
+    <div id="miniCartPreview" class="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-3 flex items-center space-x-2 cursor-pointer z-40 hidden" onclick="toggleCart()">
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
+        </svg>
+        <span id="miniCartCount" class="text-gray-700 font-medium">0 items</span>
+        <span id="miniCartTotal" class="text-gray-900 font-bold">PKR 0.00</span>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact" class="text-white py-16 border-t mt-20" style="background-color: #0f0f0f; border-color: #1a1a1a;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <!-- About -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">About PakMegaMart</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Crafting premium leather goods since 1985. Dedicated to timeless quality and exceptional craftsmanship.</p>
+                </div>
+                
+                <!-- Customer Service -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">Customer Service</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="shipping_policy.html" class="hover:text-white transition-colors">Shipping Info</a></li>
+                        <li><a href="return_policy.html" class="hover:text-white transition-colors">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Company -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">Company</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="about.html" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Our Story</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal -->
+                <div>
+                    <h3 class="text-lg font-display font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="privacy_policy.html" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="terms_of_service.html" class="hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="shipping_policy.html" class="hover:text-white transition-colors">Shipping Policy</a></li>
+                        <li><a href="return_policy.html" class="hover:text-white transition-colors">Return Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Bottom Section -->
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <h2 class="text-xl font-display font-bold mb-2">PakMegaMart</h2>
+                        <p class="text-gray-500 text-sm">Premium Quality • Handcrafted Excellence</p>
+                    </div>
+                    <p class="text-gray-500 text-sm">© 2025 PakMegaMart. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="main.js"></script></body>
+</html>

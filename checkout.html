@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Premium Leather Color Palette */
+            --primary-dark: #2D1F0F;
+            --primary-brown: #8B6F47;
+            --accent-gold: #D4AF37;
+            --neutral-cream: #F5F3F0;
+            --dark-charcoal: #1A1410;
+            --accent-burgundy: #C41E3A;
+            --border-light: #E8E4E0;
+            
+            /* Legacy colors (kept for compatibility) */
+            --cognac: #B8860B;
+            --burgundy: #722F37;
+            --charcoal: #36454F;
+            --cream: #F5F5DC;
+            --saddle-brown: #8B4513;
+            --forest-green: #355E3B;
+            --soft-gold: #DAA520;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--neutral-cream);
+            color: var(--primary-dark);
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+        
+        .font-display { 
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .font-accent { font-family: 'Crimson Text', serif; }
+        
+        /* Enhanced Typography System */
+        h1 { font-size: 3.5rem; line-height: 1.1; font-weight: 700; }
+        h2 { font-size: 2.25rem; line-height: 1.2; font-weight: 600; }
+        h3 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; }
+        h4 { font-size: 1.25rem; line-height: 1.4; font-weight: 600; }
+        p { font-size: 1rem; line-height: 1.65; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-brown) 0%, #7A5C35 100%);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(139, 111, 71, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A08155 0%, #8B6F47 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 111, 71, 0.35);
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-dark);
+            border: 2px solid var(--primary-brown);
+            padding: 0.875rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-brown);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 111, 71, 0.3);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            color: var(--primary-dark);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-burgundy);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .progress-step {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active {
+            background: var(--primary-brown);
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background: var(--forest-green);
+            color: white;
+        }
+        
+        .input-field {
+            border: 1px solid var(--border-light);
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary-brown);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.1);
+        }
+        
+        .order-summary {
+            background: rgba(139, 111, 71, 0.05);
+            border: 2px solid var(--border-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="index.html" class="font-display text-2xl font-bold text-gray-900">
+                Artisan <span style="color: var(--cognac);">Leather</span>
+            </a>
+            <a href="products.html" class="nav-link text-gray-700">Back to Shop</a>
+        </div>
+    </nav>
+
+    <!-- Main Checkout Container -->
+    <div class="min-h-screen bg-gradient-to-br from-cream to-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Progress Indicator -->
+            <div class="mb-12">
+                <div class="flex items-center justify-between max-w-2xl">
+                    <div class="progress-step active w-12 h-12 rounded-full flex items-center justify-center text-white font-bold">
+                        1
+                    </div>
+                    <div class="flex-1 h-1 mx-4 bg-gray-300"></div>
+                    <div class="progress-step w-12 h-12 rounded-full flex items-center justify-center bg-gray-300 text-gray-700 font-bold" id="step2Indicator">
+                        2
+                    </div>
+                    <div class="flex-1 h-1 mx-4 bg-gray-300"></div>
+                    <div class="progress-step w-12 h-12 rounded-full flex items-center justify-center bg-gray-300 text-gray-700 font-bold" id="step3Indicator">
+                        3
+                    </div>
+                </div>
+                <div class="flex items-center justify-between max-w-2xl mt-2 text-sm text-gray-600">
+                    <span>Shipping</span>
+                    <span>Payment</span>
+                    <span>Review</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Checkout Form -->
+                <div class="lg:col-span-2">
+                    <!-- Step 1: Shipping Information -->
+                    <div id="step1" class="checkout-step">
+                        <h2 class="font-display text-3xl font-bold mb-6 text-gray-900">Shipping Information</h2>
+                        
+                        <form class="space-y-4" id="shippingForm">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                    <input type="text" id="firstName" class="w-full input-field px-4 py-2 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                    <input type="text" id="lastName" class="w-full input-field px-4 py-2 rounded-lg" required>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" id="email" class="w-full input-field px-4 py-2 rounded-lg" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                <input type="tel" id="phone" class="w-full input-field px-4 py-2 rounded-lg" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                                <input type="text" id="address" class="w-full input-field px-4 py-2 rounded-lg" placeholder="Street address" required>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                                    <input type="text" id="city" class="w-full input-field px-4 py-2 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">State/Province *</label>
+                                    <input type="text" id="state" class="w-full input-field px-4 py-2 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                                    <input type="text" id="zipCode" class="w-full input-field px-4 py-2 rounded-lg" required>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Country *</label>
+                                <input type="text" id="country" value="Pakistan" class="w-full input-field px-4 py-2 rounded-lg" required readonly>
+                            </div>
+
+                            <!-- Shipping Method -->
+                            <div class="mt-8">
+                                <p class="text-sm text-gray-600">Shipping Cost: <span class="font-semibold">PKR 160</span></p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Payment Information -->
+                    <div id="step2" class="checkout-step hidden">
+                        <h2 class="font-display text-3xl font-bold mb-6 text-gray-900">Payment Method</h2>
+                        
+                        <form class="space-y-4" id="paymentForm">
+                            <!-- Payment Method Selection -->
+                            <div class="space-y-3 mb-8">
+                                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer" style="border-color: #d4a574;">
+                                    <input type="radio" name="paymentMethod" value="cod" class="w-4 h-4" checked>
+                                    <span class="ml-3 font-medium text-gray-900">Cash on Delivery (COD)</span>
+                                </label>
+                                <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-cognac transition" style="border-color: #d4a574;">
+                                    <input type="radio" name="paymentMethod" value="banktransfer" class="w-4 h-4">
+                                    <span class="ml-3 font-medium text-gray-900">Bank Transfer</span>
+                                </label>
+                            </div>
+
+                            <!-- COD Notice -->
+                            <div id="codNotice" class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <p class="text-sm text-green-800 font-semibold mb-2">💳 Cash on Delivery</p>
+                                <p class="text-sm text-green-700">Your order will be delivered to your address. Please keep exact change ready for the delivery person.</p>
+                            </div>
+
+                            <!-- Bank Transfer Details -->
+                            <div id="bankTransferDetails" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                                <p class="text-sm font-semibold text-gray-900">🏦 Bank Transfer Details</p>
+                                
+                                <div class="bg-white rounded p-3 border border-blue-100 space-y-2">
+                                    <div class="flex justify-between items-start">
+                                        <span class="text-sm text-gray-700 font-medium">Bank Name:</span>
+                                        <span class="text-sm text-gray-900 font-semibold">Meezan Bank</span>
+                                    </div>
+                                    <div class="flex justify-between items-start">
+                                        <span class="text-sm text-gray-700 font-medium">Account Title:</span>
+                                        <span class="text-sm text-gray-900 font-semibold">MUHAMMAD AHMAD</span>
+                                    </div>
+                                    <div class="flex justify-between items-start">
+                                        <span class="text-sm text-gray-700 font-medium">Account Number:</span>
+                                        <span class="text-sm text-gray-900 font-semibold">02780113523044</span>
+                                    </div>
+                                    <div class="flex justify-between items-start">
+                                        <span class="text-sm text-gray-700 font-medium">IBAN:</span>
+                                        <span class="text-sm text-gray-900 font-semibold">PK98MEZN0002780113523044</span>
+                                    </div>
+                                    <div class="flex justify-between items-start">
+                                        <span class="text-sm text-gray-700 font-medium">Branch:</span>
+                                        <span class="text-sm text-gray-900 font-semibold">Avian Chowk, BR Lahore</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-amber-50 border border-amber-200 rounded p-3 mt-3">
+                                    <p class="text-sm text-amber-800 mb-2"><span class="font-semibold">📱 Important:</span> After making the bank transfer, please send the payment proof on WhatsApp:</p>
+                                    <a href="https://wa.me/923268502690" target="_blank" class="inline-block bg-green-500 text-white px-4 py-2 rounded font-medium text-sm hover:bg-green-600 transition">
+                                        📲 Send on WhatsApp: +92 326 8502690
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 3: Order Review -->
+                    <div id="step3" class="checkout-step hidden">
+                        <h2 class="font-display text-3xl font-bold mb-6 text-gray-900">Order Review</h2>
+                        
+                        <div class="space-y-6">
+                            <!-- Shipping Summary -->
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                                <h3 class="font-semibold text-gray-900 mb-4">Shipping Address</h3>
+                                <div id="shippingSummary" class="text-sm text-gray-700 space-y-1"></div>
+                                <button type="button" onclick="changeStep(1)" class="mt-4 text-cognac font-medium text-sm hover:underline" style="color: var(--cognac);">Edit</button>
+                            </div>
+
+                            <!-- Billing Summary -->
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                                <h3 class="font-semibold text-gray-900 mb-4">Billing Information</h3>
+                                <div id="billingSummary" class="text-sm text-gray-700 space-y-1"></div>
+                                <button type="button" onclick="changeStep(2)" class="mt-4 text-cognac font-medium text-sm hover:underline" style="color: var(--cognac);">Edit</button>
+                            </div>
+
+                            <!-- Terms & Conditions -->
+                            <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                                <label class="flex items-start">
+                                    <input type="checkbox" id="agreeTerms" class="mt-1 w-4 h-4" required>
+                                    <span class="ml-3 text-sm text-gray-700">
+                                        I agree to the <a href="#" class="font-medium text-cognac hover:underline" style="color: var(--cognac);">terms and conditions</a> and <a href="#" class="font-medium text-cognac hover:underline" style="color: var(--cognac);">privacy policy</a>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex items-center justify-between mt-8">
+                        <button id="prevBtn" type="button" onclick="changeStep(-1)" class="px-6 py-3 border-2 border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition hidden">
+                            ← Previous
+                        </button>
+                        <div class="flex-1"></div>
+                        <button id="nextBtn" type="button" onclick="changeStep(1)" class="px-8 py-3 btn-primary rounded-lg font-medium text-white">
+                            Continue to Payment →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Summary Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="order-summary rounded-lg p-6 sticky top-24">
+                        <h3 class="font-display text-2xl font-bold text-gray-900 mb-6">Order Summary</h3>
+                        
+                        <div id="checkoutSummaryItems" class="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                            <!-- Items will be populated here -->
+                        </div>
+                        
+                        <div class="border-t-2 border-gray-300 pt-4 space-y-3">
+                            <div class="flex justify-between text-gray-700">
+                                <span>Subtotal</span>
+                                <span id="subtotal">PKR 0.00</span>
+                            </div>
+                            <div class="flex justify-between text-gray-700">
+                                <span>Shipping</span>
+                                <span id="shippingCost">PKR 160.00</span>
+                            </div>
+                            <div class="border-t border-gray-300 pt-3 flex justify-between font-bold text-lg text-gray-900">
+                                <span>Total</span>
+                                <span id="grandTotal">PKR 0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <details class="text-sm text-gray-600">
+                                <summary class="cursor-pointer font-medium text-gray-700 mb-2">Order Details</summary>
+                                <ul id="orderDetailsList" class="space-y-2 mt-3 ml-4">
+                                    <!-- Details will be populated here -->
+                                </ul>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-2">Order Confirmed!</h2>
+            <p class="text-gray-600 mb-4">Thank you for your purchase. Your order confirmation has been sent to your email.</p>
+            <div class="space-y-2 mb-6 text-left bg-gray-50 p-4 rounded-lg">
+                <p class="text-sm"><span class="font-medium">Order Number:</span> <span id="orderNumber" class="text-cognac font-mono" style="color: var(--cognac);">#123456</span></p>
+                <p class="text-sm"><span class="font-medium">Estimated Delivery:</span> <span id="deliveryDate">Jan 15, 2026</span></p>
+            </div>
+            <button onclick="goToHome()" class="w-full btn-primary py-3 rounded-lg font-medium text-white">
+                Return to Home
+            </button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        let currentStep = 1;
+        const maxSteps = 3;
+
+        // Initialize checkout on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCheckoutData();
+            updateCheckoutSummary();
+            setupPaymentMethodListeners();
+            setupShippingListeners();
+        });
+
+        function loadCheckoutData() {
+            const savedData = localStorage.getItem('checkoutData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('firstName').value = data.firstName || '';
+                document.getElementById('lastName').value = data.lastName || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('address').value = data.address || '';
+                document.getElementById('city').value = data.city || '';
+                document.getElementById('state').value = data.state || '';
+                document.getElementById('zipCode').value = data.zipCode || '';
+                document.getElementById('country').value = 'Pakistan';
+            }
+        }
+
+        function setupPaymentMethodListeners() {
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('codNotice').style.display = this.value === 'cod' ? 'block' : 'none';
+                    document.getElementById('bankTransferDetails').style.display = this.value === 'banktransfer' ? 'block' : 'none';
+                });
+            });
+        }
+
+        function setupShippingListeners() {
+            // No longer needed - shipping is fixed at 160 PKR
+        }
+
+        function updateCheckoutSummary() {
+            const summaryItems = document.getElementById('checkoutSummaryItems');
+            summaryItems.innerHTML = '';
+
+            if (cart.length === 0) {
+                summaryItems.innerHTML = '<p class="text-gray-600 text-sm">No items in cart</p>';
+                updateTotals();
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-start pb-4 border-b border-gray-300';
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-900 text-sm">${item.name}</p>
+                        <p class="text-xs text-gray-600">Color: ${item.color} | Qty: ${item.quantity}</p>
+                    </div>
+                    <p class="font-medium text-gray-900">PKR ${itemTotal.toLocaleString()}</p>
+                `;
+                summaryItems.appendChild(itemDiv);
+            });
+
+            document.getElementById('subtotal').textContent = `PKR ${subtotal.toLocaleString()}`;
+            updateTotals();
+        }
+
+        function updateTotals() {
+            const subtotalText = document.getElementById('subtotal').textContent.replace('PKR ', '').replace(/,/g, '');
+            const subtotal = parseFloat(subtotalText) || 0;
+            const shippingCost = 160; // Fixed shipping price
+
+            document.getElementById('shippingCost').textContent = `PKR ${shippingCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            const total = subtotal + shippingCost;
+            document.getElementById('grandTotal').textContent = `PKR ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function changeStep(direction) {
+            // Validate current step before moving
+            if (direction > 0 && !validateStep(currentStep)) {
+                return;
+            }
+
+            currentStep += direction;
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > maxSteps) currentStep = maxSteps;
+
+            updateStepDisplay();
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                // Validate shipping information
+                const required = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode', 'country'];
+                for (let field of required) {
+                    if (!document.getElementById(field).value.trim()) {
+                        alert('Please fill in all required fields');
+                        return false;
+                    }
+                }
+                // Validate email format
+                const email = document.getElementById('email').value;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return false;
+                }
+                // Validate phone format (at least 10 digits)
+                const phone = document.getElementById('phone').value.replace(/\D/g, '');
+                if (phone.length < 10) {
+                    alert('Please enter a valid phone number');
+                    return false;
+                }
+                // Save checkout data
+                const checkoutData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    zipCode: document.getElementById('zipCode').value,
+                    country: document.getElementById('country').value,
+                    shipping: 160
+                };
+                localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+                return true;
+            }
+            
+            if (step === 2) {
+                // Validate payment information - simplified for COD and Bank Transfer
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+                // No detailed validation needed for COD and Bank Transfer
+                return true;
+            }
+
+            if (step === 3) {
+                // Validate agreement
+                if (!document.getElementById('agreeTerms').checked) {
+                    alert('Please agree to the terms and conditions');
+                    return false;
+                }
+                return true;
+            }
+
+            return true;
+        }
+
+        function changeStep(step) {
+            if (step === -1) {
+                // Previous button
+                if (currentStep > 1 && !validateStep(currentStep)) return;
+                currentStep--;
+            } else if (step === 1) {
+                // Next button
+                if (!validateStep(currentStep)) return;
+                currentStep++;
+            } else {
+                // Direct step change
+                currentStep = step;
+            }
+
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > maxSteps) currentStep = maxSteps;
+
+            updateStepDisplay();
+        }
+
+        function updateStepDisplay() {
+            // Hide all steps
+            document.querySelectorAll('.checkout-step').forEach(step => {
+                step.classList.add('hidden');
+            });
+
+            // Show current step
+            document.getElementById(`step${currentStep}`).classList.remove('hidden');
+
+            // Update progress indicators
+            for (let i = 1; i <= maxSteps; i++) {
+                const indicator = i === 1 ? document.querySelector('.progress-step') : document.getElementById(`step${i}Indicator`);
+                if (i < currentStep) {
+                    indicator.classList.remove('active');
+                    indicator.classList.add('completed');
+                    indicator.innerHTML = '✓';
+                } else if (i === currentStep) {
+                    indicator.classList.remove('completed');
+                    indicator.classList.add('active');
+                    indicator.innerHTML = i;
+                } else {
+                    indicator.classList.remove('active', 'completed');
+                    indicator.classList.add('bg-gray-300', 'text-gray-700');
+                    indicator.innerHTML = i;
+                }
+            }
+
+            // Update buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (currentStep === 1) {
+                prevBtn.classList.add('hidden');
+                nextBtn.innerHTML = 'Continue to Payment →';
+                nextBtn.onclick = () => changeStep(1);
+            } else if (currentStep === 2) {
+                prevBtn.classList.remove('hidden');
+                nextBtn.innerHTML = 'Review Order →';
+                nextBtn.onclick = () => changeStep(1);
+            } else if (currentStep === 3) {
+                prevBtn.classList.remove('hidden');
+                nextBtn.innerHTML = 'Complete Order';
+                nextBtn.onclick = completeOrder;
+            }
+
+            // Update summary display
+            if (currentStep === 3) {
+                updateReviewSummary();
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateReviewSummary() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zipCode = document.getElementById('zipCode').value;
+            const country = document.getElementById('country').value;
+
+            const shippingSummary = document.getElementById('shippingSummary');
+            shippingSummary.innerHTML = `
+                <p>${firstName} ${lastName}</p>
+                <p>${address}</p>
+                <p>${city}, ${state} ${zipCode}</p>
+                <p>${country}</p>
+                <p class="mt-2 font-medium">Email: ${email}</p>
+            `;
+
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            let paymentText = '';
+            if (paymentMethod === 'cod') {
+                paymentText = 'Cash on Delivery (COD)';
+            } else if (paymentMethod === 'banktransfer') {
+                paymentText = 'Bank Transfer (Meezan Bank)';
+            }
+
+            const billingSummary = document.getElementById('billingSummary');
+            billingSummary.innerHTML = `
+                <p>Payment Method: ${paymentText}</p>
+                <p class="mt-2 text-xs text-gray-600">Amount: PKR ${document.getElementById('grandTotal').textContent}</p>
+            `;
+        }
+
+        function completeOrder() {
+            if (!validateStep(3)) return;
+
+            // Generate order number
+            const orderNumber = '#' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            const deliveryDate = new Date();
+            deliveryDate.setDate(deliveryDate.getDate() + 7);
+
+            document.getElementById('orderNumber').textContent = orderNumber;
+            document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            // Show success modal
+            document.getElementById('successModal').classList.remove('hidden');
+
+            // Clear cart and checkout data
+            setTimeout(() => {
+                cart = [];
+                localStorage.removeItem('artisanCart');
+                localStorage.removeItem('checkoutData');
+            }, 2000);
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body>
+</html>
