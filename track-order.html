@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="resources/whatsapp-button.css" rel="stylesheet">
+    <link href="resources/floating-buttons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config-loader.js"></script>
+    <script src="supabase.js"></script>
+    <script src="resources/component-loader.js"></script>
+    <script src="resources/cart-manager.js"></script>
+    
+    <style>
+        :root {
+            --primary-dark: #2D1F0F;
+            --primary-brown: #8B6F47;
+            --accent-gold: #D4AF37;
+            --neutral-cream: #F5F3F0;
+            --dark-charcoal: #1A1410;
+            --accent-burgundy: #C41E3A;
+            --border-light: #E8E4E0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--neutral-cream);
+            color: var(--primary-dark);
+        }
+        
+        .font-display {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-shipped {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-light);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -38px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border-light);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--primary-brown);
+        }
+        
+        .timeline-item.active::before {
+            background: var(--primary-brown);
+            box-shadow: 0 0 0 4px var(--accent-gold);
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="index.html" class="font-display text-2xl font-bold text-gray-900 hover:opacity-80 transition-opacity">
+                PakMegaMart
+            </a>
+            <a href="products.html" class="text-gray-700 hover:text-gray-900">Back to Shop</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-12">
+        <div class="max-w-2xl mx-auto px-4">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-display font-bold text-gray-900 mb-4">Track Your Order</h1>
+                <p class="text-gray-600">Enter your order number and email to track your package</p>
+            </div>
+
+            <!-- Search Form -->
+            <div class="card mb-8">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Order Number</label>
+                        <input type="text" id="orderNumber" placeholder="e.g., #123456" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="orderEmail" placeholder="your@email.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <button onclick="trackOrder()" class="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
+                        Track Order
+                    </button>
+                </div>
+            </div>
+
+            <!-- Order Details (Hidden by default) -->
+            <div id="orderDetails" class="hidden space-y-8">
+                <!-- Order Header -->
+                <div class="card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-2xl font-display font-bold text-gray-900" id="displayOrderNumber"></h2>
+                            <p class="text-gray-600 text-sm" id="orderDate"></p>
+                        </div>
+                        <span class="status-badge" id="statusBadge"></span>
+                    </div>
+                    <div class="border-t pt-4">
+                        <p class="text-sm text-gray-600 mb-2"><span class="font-medium">Estimated Delivery:</span> <span id="deliveryDate"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Payment Method:</span> <span id="paymentMethod"></span></p>
+                    </div>
+                </div>
+
+                <!-- Order Status Timeline -->
+                <div class="card">
+                    <h3 class="font-display font-bold text-lg text-gray-900 mb-6">Order Status</h3>
+                    <div class="timeline" id="statusTimeline">
+                        <!-- Timeline items will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="card">
+                    <h3 class="font-display font-bold text-lg text-gray-900 mb-4">Order Items</h3>
+                    <div class="space-y-3" id="orderItems">
+                        <!-- Items will be inserted here -->
+                    </div>
+                    <div class="border-t mt-4 pt-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span class="font-medium" id="subtotalDisplay">PKR 0</span>
+                        </div>
+                        <div class="flex justify-between mb-4">
+                            <span class="text-gray-600">Shipping:</span>
+                            <span class="font-medium" id="shippingDisplay">PKR 160</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-bold border-t pt-4">
+                            <span>Total:</span>
+                            <span id="totalDisplay">PKR 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="card">
+                    <h3 class="font-display font-bold text-lg text-gray-900 mb-4">Shipping Address</h3>
+                    <div id="shippingAddress" class="text-sm text-gray-700 space-y-1">
+                        <!-- Address will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="card bg-blue-50 border-blue-200">
+                    <h3 class="font-display font-bold text-gray-900 mb-2">Need Help?</h3>
+                    <p class="text-sm text-gray-700 mb-4">If you have any questions about your order, please contact us:</p>
+                    <div class="space-y-2 text-sm">
+                        <p><span class="font-medium">Email:</span> orders@pakmegamart.com</p>
+                        <p><span class="font-medium">WhatsApp:</span> <a href="https://wa.me/923268502690" class="text-blue-600 hover:underline">+92 326 8502690</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message (Hidden by default) -->
+            <div id="errorMessage" class="hidden card bg-red-50 border-red-200">
+                <p class="text-red-700 font-medium" id="errorText"></p>
+            </div>
+
+            <!-- Loading State (Hidden by default) -->
+            <div id="loadingState" class="hidden">
+                <div class="flex justify-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+                <p class="text-center text-gray-600 mt-4">Loading order details...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wait for Supabase to be ready
+        setTimeout(() => {
+            console.log('✅ Track Order page ready');
+        }, 500);
+
+        async function trackOrder() {
+            const orderNumber = document.getElementById('orderNumber').value.trim();
+            const email = document.getElementById('orderEmail').value.trim();
+
+            // Hide previous results
+            document.getElementById('orderDetails').classList.add('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+
+            // Validation
+            if (!orderNumber || !email) {
+                showError('Please enter both order number and email');
+                return;
+            }
+
+            try {
+                // Query orders from Supabase
+                if (!window.supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+
+                const { data: orders, error } = await window.supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .eq('order_number', orderNumber)
+                    .eq('customer_email', email);
+
+                document.getElementById('loadingState').classList.add('hidden');
+
+                if (error) throw error;
+                if (!orders || orders.length === 0) {
+                    showError('Order not found. Please check your order number and email.');
+                    return;
+                }
+
+                const order = orders[0];
+
+                // Fetch order items
+                const { data: items } = await window.supabaseClient
+                    .from('order_items')
+                    .select('*')
+                    .eq('order_id', order.id);
+
+                // Fetch order status history
+                const { data: history } = await window.supabaseClient
+                    .from('order_status_history')
+                    .select('*')
+                    .eq('order_id', order.id)
+                    .order('created_at', { ascending: true });
+
+                // Display order details
+                displayOrder(order, items, history);
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                showError('Error loading order. Please try again later.');
+                document.getElementById('loadingState').classList.add('hidden');
+            }
+        }
+
+        function displayOrder(order, items, history) {
+            // Order header
+            document.getElementById('displayOrderNumber').textContent = order.order_number;
+            document.getElementById('orderDate').textContent = 'Placed on ' + new Date(order.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            
+            // Status badge
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.className = `status-badge status-${order.status}`;
+            statusBadge.textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+
+            // Delivery date
+            document.getElementById('deliveryDate').textContent = order.estimated_delivery_date || 'TBD';
+            
+            // Payment method
+            const paymentMethods = {
+                'cod': 'Cash on Delivery (COD)',
+                'banktransfer': 'Bank Transfer'
+            };
+            document.getElementById('paymentMethod').textContent = paymentMethods[order.payment_method] || order.payment_method;
+
+            // Status timeline
+            const timeline = document.getElementById('statusTimeline');
+            timeline.innerHTML = '';
+            
+            const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+            const statusLabels = {
+                'pending': 'Order Placed',
+                'processing': 'Processing',
+                'shipped': 'Shipped',
+                'delivered': 'Delivered'
+            };
+
+            statuses.forEach(status => {
+                const statusHistory = history?.find(h => h.status === status);
+                const isActive = statuses.indexOf(status) <= statuses.indexOf(order.status);
+                
+                const timelineItem = document.createElement('div');
+                timelineItem.className = `timeline-item ${isActive ? 'active' : ''}`;
+                timelineItem.innerHTML = `
+                    <div class="font-medium text-gray-900">${statusLabels[status]}</div>
+                    ${statusHistory ? `<p class="text-sm text-gray-600">${new Date(statusHistory.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>` : ''}
+                    ${statusHistory?.notes ? `<p class="text-sm text-gray-600 mt-1">${statusHistory.notes}</p>` : ''}
+                `;
+                timeline.appendChild(timelineItem);
+            });
+
+            // Order items
+            const itemsContainer = document.getElementById('orderItems');
+            itemsContainer.innerHTML = '';
+            let subtotal = 0;
+
+            items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
+                itemElement.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-900">${item.product_name}</p>
+                        <p class="text-sm text-gray-600">Color: ${item.color} | Qty: ${item.quantity}</p>
+                    </div>
+                    <p class="font-medium text-gray-900">PKR ${item.item_total?.toLocaleString() || (item.product_price * item.quantity).toLocaleString()}</p>
+                `;
+                itemsContainer.appendChild(itemElement);
+                subtotal += item.item_total || (item.product_price * item.quantity);
+            });
+
+            // Totals
+            document.getElementById('subtotalDisplay').textContent = `PKR ${subtotal.toLocaleString()}`;
+            document.getElementById('shippingDisplay').textContent = `PKR ${order.shipping_cost.toLocaleString()}`;
+            document.getElementById('totalDisplay').textContent = `PKR ${order.total.toLocaleString()}`;
+
+            // Shipping address
+            const address = order.shipping_address;
+            const addressDiv = document.getElementById('shippingAddress');
+            addressDiv.innerHTML = `
+                <p>${address.first_name} ${address.last_name}</p>
+                <p>${address.address}</p>
+                <p>${address.city}, ${address.state} ${address.zip_code}</p>
+                <p>${address.country}</p>
+                <p class="mt-2 font-medium">${address.phone}</p>
+            `;
+
+            // Show order details
+            document.getElementById('orderDetails').classList.remove('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').classList.remove('hidden');
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('orderDetails').classList.add('hidden');
+            document.getElementById('loadingState').classList.add('hidden');
+        }
+    </script>
+    <include src="waicon.html"></include>
+    <include src="floatingcart.html"></include>
+</body>
+</html>

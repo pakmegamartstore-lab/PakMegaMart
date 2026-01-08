@@ -7,6 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="resources/whatsapp-button.css" rel="stylesheet">
+    <link href="resources/floating-buttons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config-loader.js"></script>
+    <script src="supabase.js"></script>
+    <script src="resources/component-loader.js"></script>
+    <script src="resources/cart-manager.js"></script>
     
     <style>
         :root {
@@ -177,8 +184,8 @@
     <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <a href="index.html" class="font-display text-2xl font-bold text-gray-900">
-                Artisan <span style="color: var(--cognac);">Leather</span>
+            <a href="index.html" class="font-display text-2xl font-bold text-gray-900 hover:opacity-80 transition-opacity">
+                PakMegaMart
             </a>
             <a href="products.html" class="nav-link text-gray-700">Back to Shop</a>
         </div>
@@ -695,36 +702,105 @@
             `;
         }
 
-        function completeOrder() {
+        async function completeOrder() {
             if (!validateStep(3)) return;
 
-            // Generate order number
-            const orderNumber = '#' + Math.random().toString(36).substr(2, 9).toUpperCase();
-            const deliveryDate = new Date();
-            deliveryDate.setDate(deliveryDate.getDate() + 7);
+            // Show loading state
+            const nextBtn = document.getElementById('nextBtn');
+            const originalText = nextBtn.innerHTML;
+            nextBtn.innerHTML = 'Processing...';
+            nextBtn.disabled = true;
 
-            document.getElementById('orderNumber').textContent = orderNumber;
-            document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
+            try {
+                // Get cart items
+                const cart = JSON.parse(localStorage.getItem('pakMegaMartCart')) || [];
+                if (cart.length === 0) {
+                    alert('Cart is empty');
+                    return;
+                }
 
-            // Show success modal
-            document.getElementById('successModal').classList.remove('hidden');
+                // Get form data
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const address = document.getElementById('address').value;
+                const city = document.getElementById('city').value;
+                const state = document.getElementById('state').value;
+                const zipCode = document.getElementById('zipCode').value;
+                const country = document.getElementById('country').value;
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-            // Clear cart and checkout data
-            setTimeout(() => {
-                cart = [];
-                localStorage.removeItem('artisanCart');
-                localStorage.removeItem('checkoutData');
-            }, 2000);
+                // Calculate totals
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const shippingCost = 160;
+                const total = subtotal + shippingCost;
+
+                // Prepare order data for Supabase
+                const orderData = {
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
+                    phone: phone,
+                    address: address,
+                    city: city,
+                    state: state,
+                    zip_code: zipCode,
+                    country: country,
+                    payment_method: paymentMethod,
+                    subtotal: subtotal,
+                    shipping_cost: shippingCost,
+                    total: total,
+                    items: cart,
+                    notes: null
+                };
+
+                // Save to Supabase
+                let savedOrder = null;
+                if (typeof supabaseDB !== 'undefined' && supabaseDB.createCompleteOrder) {
+                    savedOrder = await supabaseDB.createCompleteOrder(orderData);
+                    console.log('Order saved to Supabase:', savedOrder);
+                } else {
+                    console.warn('Supabase not available, creating local order');
+                }
+
+                // Generate order number (use Supabase order number if available)
+                const orderNumber = savedOrder?.order_number || '#' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                const deliveryDate = new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + 5);
+
+                document.getElementById('orderNumber').textContent = orderNumber;
+                document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                // Show success modal
+                document.getElementById('successModal').classList.remove('hidden');
+
+                // Clear cart and checkout data after 2 seconds
+                setTimeout(() => {
+                    localStorage.removeItem('pakMegaMartCart');
+                    localStorage.removeItem('checkoutData');
+                    // Redirect home after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                }, 2000);
+            } catch (error) {
+                console.error('Error completing order:', error);
+                alert('Error processing order: ' + error.message);
+                nextBtn.innerHTML = originalText;
+                nextBtn.disabled = false;
+            }
         }
 
         function goToHome() {
             window.location.href = 'index.html';
         }
     </script>
-
+    <include src="waicon.html"></include>
+    <include src="floatingcart.html"></include>
 </body>
 </html>

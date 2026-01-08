@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config-loader.js"></script>
+    <script src="supabase.js"></script>
+    
+    <style>
+        :root {
+            --primary-dark: #2D1F0F;
+            --primary-brown: #8B6F47;
+            --accent-gold: #D4AF37;
+            --accent-burgundy: #C41E3A;
+            --border-light: #E8E4E0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: var(--primary-dark);
+        }
+        
+        .font-display {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border-light);
+            min-height: 100vh;
+        }
+        
+        .sidebar-link {
+            padding: 1rem 1.5rem;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .sidebar-link:hover {
+            background: #f3f4f6;
+            color: var(--primary-brown);
+        }
+        
+        .sidebar-link.active {
+            border-left-color: var(--accent-burgundy);
+            background: #fef3f4;
+            color: var(--accent-burgundy);
+            font-weight: 600;
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-brown);
+            margin: 0.5rem 0;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-processing { background: #dbeafe; color: #1e40af; }
+        .status-shipped { background: #dcfce7; color: #166534; }
+        .status-delivered { background: #d1fae5; color: #065f46; }
+        
+        .btn-primary {
+            background: var(--primary-brown);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #7a5c35;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.875rem;
+        }
+        
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64">
+            <div class="p-6 border-b border-border-light">
+                <h1 class="font-display text-xl font-bold text-gray-900">Admin Panel</h1>
+                <p class="text-sm text-gray-600 mt-1">PakMegaMart</p>
+            </div>
+            
+            <nav class="mt-6">
+                <a onclick="switchTab('dashboard')" class="sidebar-link active">📊 Dashboard</a>
+                <a onclick="switchTab('orders')" class="sidebar-link">📦 Orders</a>
+                <a onclick="switchTab('customers')" class="sidebar-link">👥 Customers</a>
+                <a onclick="switchTab('products')" class="sidebar-link">🛍️ Products</a>
+                <a onclick="switchTab('inventory')" class="sidebar-link">📈 Inventory</a>
+            </nav>
+            
+            <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-border-light">
+                <button onclick="logout()" class="w-full bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Header -->
+            <div class="bg-white border-b border-border-light p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-display font-bold text-gray-900" id="pageTitle">Dashboard</h2>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Logged in as <span id="adminName">Admin</span></p>
+                        <p class="text-xs text-gray-500 mt-1" id="lastUpdate">Last updated: Now</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-6">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="stat-card">
+                            <p class="text-gray-600 text-sm font-medium">Total Orders</p>
+                            <div class="stat-value" id="totalOrders">0</div>
+                            <p class="text-xs text-gray-500">All time</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-gray-600 text-sm font-medium">Pending Orders</p>
+                            <div class="stat-value" id="pendingOrders">0</div>
+                            <p class="text-xs text-gray-500">Awaiting processing</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-gray-600 text-sm font-medium">Total Revenue</p>
+                            <div class="stat-value" id="totalRevenue">PKR 0</div>
+                            <p class="text-xs text-gray-500">From all orders</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-gray-600 text-sm font-medium">Total Customers</p>
+                            <div class="stat-value" id="totalCustomers">0</div>
+                            <p class="text-xs text-gray-500">Unique customers</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card">
+                            <h3 class="font-display font-bold text-gray-900 mb-4">Recent Orders</h3>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Order #</th>
+                                            <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentOrdersTable">
+                                        <tr><td colspan="4" class="text-center text-gray-500">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3 class="font-display font-bold text-gray-900 mb-4">Top Products</h3>
+                            <div id="topProductsList" class="space-y-3">
+                                <p class="text-gray-500 text-center text-sm">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Orders Tab -->
+                <div id="orders" class="tab-content">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-display font-bold text-gray-900">All Orders</h3>
+                            <button onclick="refreshOrders()" class="btn-secondary">🔄 Refresh</button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <input type="text" id="orderFilter" placeholder="Search by order # or email..." class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Customer Email</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTable">
+                                    <tr><td colspan="6" class="text-center text-gray-500">Loading orders...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Customers Tab -->
+                <div id="customers" class="tab-content">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-display font-bold text-gray-900">All Customers</h3>
+                            <button onclick="refreshCustomers()" class="btn-secondary">🔄 Refresh</button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>City</th>
+                                        <th>Orders</th>
+                                        <th>Joined</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTable">
+                                    <tr><td colspan="6" class="text-center text-gray-500">Loading customers...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Tab -->
+                <div id="products" class="tab-content">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-display font-bold text-gray-900">All Products</h3>
+                            <button onclick="openAddProductModal()" class="btn-primary">+ Add Product</button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTable">
+                                    <tr><td colspan="6" class="text-center text-gray-500">Loading products...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Inventory Tab -->
+                <div id="inventory" class="tab-content">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-display font-bold text-gray-900">Inventory Management</h3>
+                            <button onclick="refreshInventory()" class="btn-secondary">🔄 Refresh</button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Available</th>
+                                        <th>Reserved</th>
+                                        <th>Sold</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryTable">
+                                    <tr><td colspan="6" class="text-center text-gray-500">Loading inventory...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Order Status Modal -->
+    <div id="updateOrderModal" class="modal">
+        <div class="modal-content">
+            <h3 class="font-display font-bold text-lg text-gray-900 mb-4">Update Order Status</h3>
+            
+            <div class="form-group">
+                <label>Order Number</label>
+                <input type="text" id="modalOrderNumber" disabled class="bg-gray-100">
+            </div>
+            
+            <div class="form-group">
+                <label>New Status</label>
+                <select id="modalOrderStatus">
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Notes (optional)</label>
+                <textarea id="modalStatusNotes" placeholder="Add notes about this status change..." rows="3"></textarea>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="saveOrderStatus()" class="flex-1 btn-primary">Save Status</button>
+                <button onclick="closeUpdateOrderModal()" class="flex-1 btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <h3 class="font-display font-bold text-lg text-gray-900 mb-4">Add New Product</h3>
+            
+            <div class="form-group">
+                <label>Product Name</label>
+                <input type="text" id="productName" placeholder="e.g., Genuine Leather Bifold">
+            </div>
+            
+            <div class="form-group">
+                <label>Price (PKR)</label>
+                <input type="number" id="productPrice" placeholder="999">
+            </div>
+            
+            <div class="form-group">
+                <label>Original Price (PKR)</label>
+                <input type="number" id="productOriginalPrice" placeholder="1300">
+            </div>
+            
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="productCategory" placeholder="wallets">
+            </div>
+            
+            <div class="form-group">
+                <label>Stock Quantity</label>
+                <input type="number" id="productStock" placeholder="50">
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="saveProduct()" class="flex-1 btn-primary">Add Product</button>
+                <button onclick="closeAddProductModal()" class="flex-1 btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentOrderId = null;
+        let allOrders = [];
+        let allCustomers = [];
+        let allProducts = [];
+
+        // Initialize
+        window.addEventListener('load', () => {
+            console.log('Admin Dashboard Loading...');
+            setTimeout(() => {
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    console.log('✅ Supabase ready');
+                    loadDashboard();
+                } else {
+                    console.error('❌ Supabase not initialized');
+                    alert('Database connection failed. Please check console.');
+                }
+            }, 1000);
+        });
+
+        function switchTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Update title
+            const titles = {
+                dashboard: '📊 Dashboard',
+                orders: '📦 Orders',
+                customers: '👥 Customers',
+                products: '🛍️ Products',
+                inventory: '📈 Inventory'
+            };
+            document.getElementById('pageTitle').textContent = titles[tab];
+            
+            // Load data for tab
+            if (tab === 'orders') loadOrders();
+            if (tab === 'customers') loadCustomers();
+            if (tab === 'products') loadProducts();
+            if (tab === 'inventory') loadInventory();
+        }
+
+        async function loadDashboard() {
+            try {
+                // Fetch all orders
+                const { data: orders } = await supabaseClient.from('orders').select('*');
+                allOrders = orders || [];
+                
+                // Fetch all customers
+                const { data: customers } = await supabaseClient.from('customers').select('*');
+                allCustomers = customers || [];
+                
+                // Fetch all products
+                const { data: products } = await supabaseClient.from('products').select('*');
+                allProducts = products || [];
+                
+                // Calculate stats
+                const totalOrders = allOrders.length;
+                const pendingOrders = allOrders.filter(o => o.status === 'pending').length;
+                const totalRevenue = allOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                const totalCustomers = allCustomers.length;
+                
+                // Update stats
+                document.getElementById('totalOrders').textContent = totalOrders;
+                document.getElementById('pendingOrders').textContent = pendingOrders;
+                document.getElementById('totalRevenue').textContent = `PKR ${totalRevenue.toLocaleString()}`;
+                document.getElementById('totalCustomers').textContent = totalCustomers;
+                
+                // Load recent orders
+                const recentOrders = allOrders.slice(-5).reverse();
+                const recentOrdersHtml = recentOrders.map(o => `
+                    <tr>
+                        <td class="font-medium">${o.order_number}</td>
+                        <td>${o.customer_email.split('@')[0]}</td>
+                        <td>PKR ${o.total.toLocaleString()}</td>
+                        <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+                    </tr>
+                `).join('');
+                document.getElementById('recentOrdersTable').innerHTML = recentOrdersHtml;
+                
+                // Load top products
+                const topProducts = allProducts.slice(0, 5).map(p => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                            <p class="font-medium text-gray-900">${p.name}</p>
+                            <p class="text-xs text-gray-500">Stock: ${p.stock_quantity}</p>
+                        </div>
+                        <p class="font-medium text-gray-900">PKR ${p.price}</p>
+                    </div>
+                `).join('');
+                document.getElementById('topProductsList').innerHTML = topProducts;
+                
+                updateLastUpdate();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error loading dashboard: ' + error.message);
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const { data: orders } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+                allOrders = orders || [];
+                
+                const html = allOrders.map(o => `
+                    <tr>
+                        <td class="font-medium">${o.order_number}</td>
+                        <td>${o.customer_email}</td>
+                        <td>PKR ${o.total.toLocaleString()}</td>
+                        <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+                        <td>${new Date(o.created_at).toLocaleDateString()}</td>
+                        <td><button onclick="openUpdateOrderModal('${o.id}', '${o.order_number}')" class="btn-secondary text-xs">Edit</button></td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('ordersTable').innerHTML = html || '<tr><td colspan="6" class="text-center text-gray-500">No orders found</td></tr>';
+                updateLastUpdate();
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const { data: customers } = await supabaseClient.from('customers').select('*').order('created_at', { ascending: false });
+                allCustomers = customers || [];
+                
+                const html = allCustomers.map(c => `
+                    <tr>
+                        <td>${c.first_name} ${c.last_name}</td>
+                        <td>${c.email}</td>
+                        <td>${c.phone}</td>
+                        <td>${c.city}</td>
+                        <td>${allOrders.filter(o => o.customer_id === c.id).length}</td>
+                        <td>${new Date(c.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('customersTable').innerHTML = html || '<tr><td colspan="6" class="text-center text-gray-500">No customers found</td></tr>';
+                updateLastUpdate();
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const { data: products } = await supabaseClient.from('products').select('*');
+                allProducts = products || [];
+                
+                const html = allProducts.map(p => `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>PKR ${p.price}</td>
+                        <td>${p.stock_quantity}</td>
+                        <td>${p.category}</td>
+                        <td><span class="status-badge" style="background: ${p.is_active ? '#dcfce7' : '#fee2e2'}; color: ${p.is_active ? '#166534' : '#991b1b'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+                        <td><button class="btn-secondary text-xs">Edit</button></td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('productsTable').innerHTML = html || '<tr><td colspan="6" class="text-center text-gray-500">No products found</td></tr>';
+                updateLastUpdate();
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        async function loadInventory() {
+            try {
+                const { data: inventory } = await supabaseClient.from('inventory').select('*');
+                const invData = inventory || [];
+                
+                const html = invData.map(inv => {
+                    const product = allProducts.find(p => p.id === inv.product_id);
+                    const status = inv.quantity_available > 10 ? 'In Stock' : inv.quantity_available > 0 ? 'Low Stock' : 'Out of Stock';
+                    const statusColor = inv.quantity_available > 10 ? '#dcfce7' : inv.quantity_available > 0 ? '#fef3c7' : '#fee2e2';
+                    const statusTextColor = inv.quantity_available > 10 ? '#166534' : inv.quantity_available > 0 ? '#92400e' : '#991b1b';
+                    
+                    return `
+                        <tr>
+                            <td>${product?.name || 'Unknown'}</td>
+                            <td>${inv.quantity_available}</td>
+                            <td>${inv.quantity_reserved}</td>
+                            <td>${inv.quantity_sold}</td>
+                            <td><span class="status-badge" style="background: ${statusColor}; color: ${statusTextColor}">${status}</span></td>
+                            <td><button class="btn-secondary text-xs">Update</button></td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                document.getElementById('inventoryTable').innerHTML = html || '<tr><td colspan="6" class="text-center text-gray-500">No inventory data found</td></tr>';
+                updateLastUpdate();
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+            }
+        }
+
+        function openUpdateOrderModal(orderId, orderNumber) {
+            currentOrderId = orderId;
+            document.getElementById('modalOrderNumber').value = orderNumber;
+            document.getElementById('updateOrderModal').classList.add('active');
+        }
+
+        function closeUpdateOrderModal() {
+            document.getElementById('updateOrderModal').classList.remove('active');
+        }
+
+        async function saveOrderStatus() {
+            const status = document.getElementById('modalOrderStatus').value;
+            const notes = document.getElementById('modalStatusNotes').value;
+            
+            if (!currentOrderId) return;
+            
+            try {
+                const result = await supabaseDB.updateOrderStatusWithHistory(currentOrderId, status, notes);
+                if (result) {
+                    alert('✅ Order status updated!');
+                    closeUpdateOrderModal();
+                    loadOrders();
+                    loadDashboard();
+                } else {
+                    alert('Error updating status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function openAddProductModal() {
+            document.getElementById('addProductModal').classList.add('active');
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('active');
+        }
+
+        async function saveProduct() {
+            const name = document.getElementById('productName').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const originalPrice = parseFloat(document.getElementById('productOriginalPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const stock = parseInt(document.getElementById('productStock').value);
+            
+            if (!name || !price || !stock) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabaseClient.from('products').insert([{
+                    name,
+                    price,
+                    original_price: originalPrice,
+                    category,
+                    stock_quantity: stock,
+                    is_active: true,
+                    description: `${name} - Premium leather product`,
+                    type: category
+                }]);
+                
+                if (error) throw error;
+                alert('✅ Product added successfully!');
+                closeAddProductModal();
+                loadProducts();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function refreshOrders() { loadOrders(); }
+        function refreshCustomers() { loadCustomers(); }
+        function refreshInventory() { loadInventory(); }
+
+        function updateLastUpdate() {
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('lastUpdate').textContent = `Last updated: ${now}`;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('adminLoggedIn');
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        // Check admin session
+        window.addEventListener('load', () => {
+            if (!localStorage.getItem('adminLoggedIn')) {
+                window.location.href = 'admin-login.html';
+            }
+        });
+    </script>
+</body>
+</html>

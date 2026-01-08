@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #2D1F0F;
+            --primary-brown: #8B6F47;
+            --accent-burgundy: #C41E3A;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-brown) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1f2937;
+        }
+        
+        .font-display {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0.5rem 0;
+        }
+        
+        .logo p {
+            color: var(--primary-brown);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-brown);
+            box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.1);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--primary-brown) 0%, #7a5c35 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(139, 111, 71, 0.2);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .btn-login.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .demo-info {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .demo-info h4 {
+            color: #166534;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .demo-info p {
+            color: #15803d;
+            font-size: 0.875rem;
+            margin: 0.25rem 0;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.875rem;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Logo -->
+        <div class="logo">
+            <h1 class="font-display">PakMegaMart</h1>
+            <p>Admin Dashboard</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message"></div>
+        
+        <!-- Login Form -->
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter admin username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter admin password" required>
+            </div>
+            
+            <button type="submit" id="loginBtn" class="btn-login">
+                🔐 Login to Dashboard
+            </button>
+        </form>
+        
+        <!-- Demo Credentials Info -->
+        <div class="demo-info">
+            <h4>Demo Credentials</h4>
+            <p><strong>Username:</strong> admin</p>
+            <p><strong>Password:</strong> admin123</p>
+            <p style="margin-top: 0.75rem; color: #047857; font-size: 0.8rem;">⚠️ Change these in production!</p>
+        </div>
+    </div>
+
+    <script>
+        // Check if already logged in
+        if (localStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'admin.html';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Demo credentials (in production, use Supabase Auth)
+            const DEMO_USERNAME = 'admin';
+            const DEMO_PASSWORD = 'admin123';
+
+            // Show loading state
+            loginBtn.classList.add('loading');
+            loginBtn.textContent = '⏳ Authenticating...';
+            errorMessage.classList.remove('show');
+
+            // Simulate authentication delay
+            setTimeout(() => {
+                if (username === DEMO_USERNAME && password === DEMO_PASSWORD) {
+                    // Successful login
+                    localStorage.setItem('adminLoggedIn', 'true');
+                    localStorage.setItem('adminName', username);
+                    
+                    // Redirect to dashboard
+                    window.location.href = 'admin.html';
+                } else {
+                    // Failed login
+                    loginBtn.classList.remove('loading');
+                    loginBtn.textContent = '🔐 Login to Dashboard';
+                    errorMessage.textContent = '❌ Invalid username or password. Use demo credentials.';
+                    errorMessage.classList.add('show');
+                    
+                    // Clear password field
+                    document.getElementById('password').value = '';
+                }
+            }, 800);
+        }
+
+        // Auto-fill demo credentials on click
+        document.querySelector('.demo-info').addEventListener('click', () => {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
+        });
+    </script>
+</body>
+</html>

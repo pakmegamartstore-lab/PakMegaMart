@@ -1,0 +1,238 @@
+/* WhatsApp Floating Button Styles */
+.wa-float-container {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+}
+
+/* Base Button Style */
+.wa-button {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+    position: relative;
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+}
+
+/* Pulse Animation Ring */
+.wa-button::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #25d366;
+    border-radius: 50%;
+    z-index: -1;
+    animation: wa-ring-pulse 2s infinite;
+}
+
+@keyframes wa-ring-pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* SVG Icon styling */
+.wa-button svg {
+    width: 32px;
+    height: 32px;
+    fill: white;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+}
+
+/* Tooltip message bubble */
+.floating-tooltip {
+    background: white;
+    color: #333;
+    padding: 10px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-right: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(20px);
+    transition: all 0.3s ease;
+    position: relative;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Tooltip Arrow */
+.floating-tooltip::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 8px solid white;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+
+/* Interaction States */
+.wa-float-container:hover .floating-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.wa-button:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 15px 30px rgba(37, 211, 102, 0.5);
+}
+
+.wa-button:hover svg {
+    transform: scale(1.05);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .wa-float-container {
+        bottom: 20px;
+        right: 20px;
+    }
+    .floating-tooltip {
+        display: none; /* Tooltips usually clutter mobile screens */
+    }
+    .wa-button {
+        width: 58px;
+        height: 58px;
+    }
+}
+
+/* Hide WhatsApp floating button when the cart panel is open */
+body.cart-open .wa-float-container {
+    display: none !important;
+}
+
+/* General Page Style (Optional) */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    height: 200vh; /* Added height to show floating effect on scroll */
+}
+
+/* Container positioning */
+.wa-float-container {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+}
+
+/* Base Button Style */
+.wa-button {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+    position: relative;
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+}
+
+/* Pulse Animation Ring */
+.wa-button::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #25d366;
+    border-radius: 50%;
+    z-index: -1;
+    animation: wa-ring-pulse 2s infinite;
+}
+
+@keyframes wa-ring-pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* SVG Icon styling */
+.wa-button svg {
+    width: 32px;
+    height: 32px;
+    fill: white;
+    filter: drop_shadow(0 2px 2px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+}
+
+/* Tooltip message bubble */
+.floating-tooltip {
+    background: white;
+    color: #333;
+    padding: 10px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-right: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(20px);
+    transition: all 0.3s ease;
+    position: relative;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Tooltip Arrow */
+.floating-tooltip::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 8px solid white;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+
+/* Interaction States */
+.wa-float-container:hover .floating-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.wa-button:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 15px 30px rgba(37, 211, 102, 0.5);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .wa-float-container {
+        bottom: 20px;
+        right: 20px;
+    }
+    .floating-tooltip {
+        display: none; /* Tooltips usually clutter mobile screens */
+    }
+    .wa-button {
+        width: 58px;
+        height: 58px;
+    }
+}

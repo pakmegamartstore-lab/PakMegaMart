@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config-loader.js"></script>
+    <script src="supabase.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">Supabase Connection Test</h1>
+            
+            <div id="status" class="mb-6 p-4 bg-gray-100 rounded-lg">
+                <p class="text-gray-600">Testing connection...</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">Configuration Status</h2>
+                    <div id="config-status" class="space-y-2 text-sm">
+                        <p>Loading configuration...</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">Supabase Client Status</h2>
+                    <div id="client-status" class="space-y-2 text-sm">
+                        <p>Loading client...</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">Test Results</h2>
+                    <div id="test-results" class="space-y-2 text-sm">
+                        <p>Running tests...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="mt-8 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+                Refresh Page
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function updateStatus(elementId, content, isSuccess = null) {
+            const element = document.getElementById(elementId);
+            const className = isSuccess === true ? 'text-green-700' : isSuccess === false ? 'text-red-700' : 'text-gray-700';
+            element.innerHTML = `<p class="${className}">${content}</p>`;
+        }
+        
+        // Wait for everything to load
+        setTimeout(() => {
+            // Check configuration
+            const supabaseUrl = getEnv('SUPABASE_URL');
+            const supabaseAnonKey = getEnv('SUPABASE_ANON_KEY');
+            const supabasePublishableKey = getEnv('SUPABASE_PUBLISHABLE_KEY');
+            
+            let configHtml = '';
+            configHtml += `<p><span class="font-medium">SUPABASE_URL:</span> ${supabaseUrl ? '✅ Loaded' : '❌ Missing'}</p>`;
+            configHtml += `<p><span class="font-medium">SUPABASE_ANON_KEY:</span> ${supabaseAnonKey ? '✅ Loaded' : '❌ Missing'}</p>`;
+            configHtml += `<p><span class="font-medium">SUPABASE_PUBLISHABLE_KEY:</span> ${supabasePublishableKey ? '✅ Loaded' : '❌ Missing'}</p>`;
+            document.getElementById('config-status').innerHTML = configHtml;
+            
+            // Check Supabase client
+            const hasSupabaseLib = typeof supabase !== 'undefined';
+            const hasClient = typeof supabaseClient !== 'undefined' && supabaseClient !== null;
+            
+            let clientHtml = '';
+            clientHtml += `<p><span class="font-medium">Supabase Library:</span> ${hasSupabaseLib ? '✅ Loaded' : '❌ Missing'}</p>`;
+            clientHtml += `<p><span class="font-medium">Supabase Client:</span> ${hasClient ? '✅ Initialized' : '❌ Not initialized'}</p>`;
+            document.getElementById('client-status').innerHTML = clientHtml;
+            
+            // Run tests
+            let testHtml = '';
+            if (supabaseUrl && supabaseAnonKey && hasSupabaseLib && hasClient) {
+                testHtml += '<p class="text-green-700">✅ All connections ready!</p>';
+                testHtml += '<p class="text-green-700">✅ Supabase is properly configured and ready to use.</p>';
+            } else {
+                testHtml += '<p class="text-red-700">❌ Configuration incomplete</p>';
+                if (!supabaseUrl || !supabaseAnonKey) {
+                    testHtml += '<p class="text-red-700">Missing .env variables</p>';
+                }
+                if (!hasSupabaseLib) {
+                    testHtml += '<p class="text-red-700">Supabase library not loaded</p>';
+                }
+                if (!hasClient) {
+                    testHtml += '<p class="text-red-700">Supabase client not initialized</p>';
+                }
+            }
+            document.getElementById('test-results').innerHTML = testHtml;
+            
+            // Update main status
+            if (supabaseUrl && supabaseAnonKey && hasSupabaseLib && hasClient) {
+                document.getElementById('status').innerHTML = '<p class="text-green-700 font-semibold">✅ Supabase Connection Successful!</p>';
+            } else {
+                document.getElementById('status').innerHTML = '<p class="text-red-700 font-semibold">❌ Supabase Connection Failed</p>';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

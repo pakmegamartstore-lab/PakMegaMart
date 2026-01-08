@@ -8,6 +8,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="resources/floating-buttons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config-loader.js"></script>
+    <script src="supabase.js"></script>
+    <script src="resources/component-loader.js"></script>
+    <script src="resources/cart-manager.js"></script>
     
     <style>
         :root {
@@ -277,12 +283,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-display font-bold nav-brand">PakMegaMart</h1>
+                    <a href="index.html" class="text-2xl font-display font-bold nav-brand hover:opacity-80 transition-opacity">PakMegaMart</a>
                 </div>
                 
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="index.html" class="nav-link font-medium">Home</a>
                     <a href="products.html" class="nav-link font-medium">Products</a>
+                    <a href="track-order.html" class="nav-link font-medium">Track Order</a>
                     <a href="about.html" class="nav-link font-medium">About</a>
                     <a href="#contact" class="nav-link font-medium">Contact</a>
                 </div>
@@ -658,5 +665,7 @@
     <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" onclick="toggleCart()"></div>
 
     <script src="main.js"></script>
+    <include src="waicon.html"></include>
+    <include src="floatingcart.html"></include>
 </body>
 </html>

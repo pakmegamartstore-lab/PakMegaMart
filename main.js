@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApp() {
     allProducts = [...productData];
     updateCartCounter();
-    updateMiniCartPreview(); // Initialize mini cart preview
     
     // Initialize page-specific functionality
     const currentPage = getCurrentPage();
@@ -486,7 +485,6 @@ function addToCart(id, name, price, image, quantity = 1, color = 'default') {
     updateCartCounter();
     updateCartDisplay();
     showCartNotification(name, quantity);
-    updateMiniCartPreview(); // Update mini cart preview
 }
 
 function removeFromCart(id, color = 'default') {
@@ -494,7 +492,6 @@ function removeFromCart(id, color = 'default') {
     saveCart();
     updateCartCounter();
     updateCartDisplay();
-    updateMiniCartPreview(); // Update mini cart preview
 }
 
 function updateCartQuantity(id, color, newQuantity) {
@@ -507,7 +504,6 @@ function updateCartQuantity(id, color, newQuantity) {
             saveCart();
             updateCartCounter();
             updateCartDisplay();
-            updateMiniCartPreview(); // Update mini cart preview
         }
     }
 }
@@ -528,18 +524,42 @@ function updateCartCounter() {
 function toggleCart() {
     const cartPanel = document.getElementById('cartPanel');
     const cartOverlay = document.getElementById('cartOverlay');
+    const floatingCart = document.querySelector('.cart-float-container');
+    const waFloating = document.querySelector('.wa-float-container');
     
     if (cartPanel.classList.contains('translate-x-full')) {
         // Open cart
         cartPanel.classList.remove('translate-x-full');
         cartOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        // mark document when cart is open so floating UI can react via CSS
+        document.body.classList.add('cart-open');
         updateCartDisplay();
+        // hide floating cart and WhatsApp icons while cart panel is open
+        try {
+            if (floatingCart) floatingCart.style.display = 'none';
+            if (waFloating) waFloating.style.display = 'none';
+        } catch (e) {
+            console.warn('Could not hide floating icons', e);
+        }
     } else {
         // Close cart
         cartPanel.classList.add('translate-x-full');
         cartOverlay.classList.add('hidden');
         document.body.style.overflow = '';
+        // remove cart-open marker
+        document.body.classList.remove('cart-open');
+        // restore floating cart icon visibility based on cart contents; always show WhatsApp
+        try {
+            if (floatingCart) {
+                const stored = JSON.parse(localStorage.getItem('pakMegaMartCart')) || [];
+                const total = stored.reduce((s, it) => s + (it.quantity||0), 0);
+                floatingCart.style.display = total > 0 ? 'flex' : 'none';
+            }
+            if (waFloating) waFloating.style.display = 'flex';
+        } catch (e) {
+            console.warn('Could not restore floating icons visibility', e);
+        }
     }
 }
 
@@ -585,50 +605,6 @@ function updateCartDisplay() {
         });
         
         cartTotal.textContent = `PKR ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-    updateMiniCartPreview(); // Call here to ensure mini cart is updated whenever the main cart display changes
-}
-
-function updateMiniCartPreview() {
-    const miniCartPreview = document.getElementById('miniCartPreview');
-    const miniCartCount = document.getElementById('miniCartCount');
-    const miniCartTotal = document.getElementById('miniCartTotal');
-
-    if (!miniCartPreview || !miniCartCount || !miniCartTotal) return;
-
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    if (totalItems > 0) {
-        miniCartCount.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
-        miniCartTotal.textContent = `PKR ${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        miniCartPreview.classList.remove('hidden');
-        // Animate in
-        if (typeof anime !== 'undefined') {
-            anime.set(miniCartPreview, { translateY: 50, opacity: 0 });
-            anime({
-                targets: miniCartPreview,
-                translateY: 0,
-                opacity: 1,
-                duration: 300,
-                easing: 'easeOutQuad'
-            });
-        }
-    } else {
-        if (typeof anime !== 'undefined') {
-            anime({
-                targets: miniCartPreview,
-                translateY: 50,
-                opacity: 0,
-                duration: 300,
-                easing: 'easeInQuad',
-                complete: () => {
-                    miniCartPreview.classList.add('hidden');
-                }
-            });
-        } else {
-            miniCartPreview.classList.add('hidden');
-        }
     }
 }
 
@@ -680,7 +656,6 @@ function checkout() {
     
     // Redirect to checkout page
     window.location.href = 'checkout.html';
-    updateMiniCartPreview(); // Update mini cart preview state before redirect
 }
 
 // Scroll animations
@@ -814,7 +789,6 @@ window.clearFilters = clearFilters;
 window.sortProducts = sortProducts;
 window.updatePriceRange = updatePriceRange;
 window.checkout = checkout;
-window.updateMiniCartPreview = updateMiniCartPreview;
 
 // ================== PREMIUM RESPONSIVE NAVBAR ==================
 // Scroll behavior detection and navbar animation system
@@ -916,67 +890,4 @@ class PremiumNavbar {
 // Initialize premium navbar when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     new PremiumNavbar();
-    createWhatsAppButton();
 });
-
-// Create floating WhatsApp button
-function createWhatsAppButton() {
-    // Check if button already exists to avoid duplicates
-    if (document.getElementById('whatsapp-float-btn')) {
-        return;
-    }
-
-    // Create container
-    const container = document.createElement('div');
-    container.id = 'whatsapp-float-btn';
-    container.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 999;
-        font-family: Arial, sans-serif;
-    `;
-
-    // Create button HTML
-    container.innerHTML = `
-        <a href="https://wa.me/923268502690" target="_blank" rel="noopener noreferrer" 
-           style="
-               display: flex;
-               align-items: center;
-               justify-content: center;
-               width: 60px;
-               height: 60px;
-               background-color: #25D366;
-               border-radius: 50%;
-               box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-               transition: all 0.3s ease;
-               text-decoration: none;
-               cursor: pointer;
-           "
-           onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(37, 211, 102, 0.4)'"
-           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)'">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 0C7.18 0 0 7.18 0 16c0 2.84.72 5.58 2.09 7.98L0.5 32l8.41-2.5C11.42 31.28 13.65 32 16 32c8.82 0 16-7.18 16-16S24.82 0 16 0zm9.07 23.5c-.39 1.09-1.53 1.85-2.71 2.02-1.04.14-2.05.27-6.36-1.41-5.08-2.03-8.38-7.11-8.63-7.44-.26-.34-2.1-2.8-2.1-5.34 0-2.54 1.33-3.78 1.8-4.3.47-.52.87-.63 1.09-.63s.54 0 .78 0c.24 0 .56-.09.87.67.31.76 1.06 2.6 1.15 2.79.1.19.17.41.07.66-.1.25-.16.4-.32.62-.16.21-.33.47-.47.64-.15.17-.31.36-.13.7.18.34 1.09 1.83 2.34 2.97 1.61 1.43 2.97 1.87 3.5 2.08.53.21.85.18 1.14-.12.29-.29 1.28-1.5 1.62-2.02.34-.52.67-.43.99-.26.32.17 2.04 1.02 2.39 1.2.35.18.58.28.67.43.09.15.09.87-.3 1.96z" fill="white"/>
-            </svg>
-        </a>
-    `;
-
-    // Add to page
-    document.body.appendChild(container);
-
-    // Add responsive styles for mobile
-    const style = document.createElement('style');
-    style.textContent = `
-        @media (max-width: 768px) {
-            #whatsapp-float-btn {
-                bottom: 20px !important;
-                right: 20px !important;
-            }
-            #whatsapp-float-btn a {
-                width: 56px !important;
-                height: 56px !important;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-}

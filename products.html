@@ -13,6 +13,13 @@
     <link href="https://unpkg.com/splitting@1.0.6/dist/splitting.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="resources/whatsapp-button.css" rel="stylesheet">
+    <link href="resources/floating-buttons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config-loader.js"></script>
+    <script src="supabase.js"></script>
+    <script src="resources/component-loader.js"></script>
+    <script src="resources/cart-manager.js"></script>
     
     <style>
         :root {
@@ -305,12 +312,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-display font-bold nav-brand">PakMegaMart</h1>
+                    <a href="index.html" class="text-2xl font-display font-bold nav-brand hover:opacity-80 transition-opacity">PakMegaMart</a>
                 </div>
                 
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="index.html" class="nav-link font-medium">Home</a>
                     <a href="products.html" class="nav-link font-medium">Products</a>
+                    <a href="track-order.html" class="nav-link font-medium">Track Order</a>
                     <a href="about.html" class="nav-link font-medium">About</a>
                     <a href="#contact" class="nav-link font-medium">Contact</a>
                 </div>
@@ -353,7 +361,7 @@
                         </select>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="productGrid">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-max" id="productGrid">
                         <!-- Products will be populated by JavaScript -->
                     </div>
                 </div>
@@ -443,15 +451,6 @@
     <!-- Cart Overlay -->
     <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
 
-    <!-- Mini Cart Preview -->
-    <div id="miniCartPreview" class="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-3 flex items-center space-x-2 cursor-pointer z-40 hidden" onclick="toggleCart()">
-        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0h9"></path>
-        </svg>
-        <span id="miniCartCount" class="text-gray-700 font-medium">0 items</span>
-        <span id="miniCartTotal" class="text-gray-900 font-bold">PKR 0.00</span>
-    </div>
-
     <!-- Footer -->
     <footer id="contact" class="text-white py-16 border-t mt-20" style="background-color: #0f0f0f; border-color: #1a1a1a;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -506,5 +505,9 @@
             </div>
         </div>
     </footer>
-    <script src="main.js"></script></body>
+    <script src="main.js"></script>
+    <script src="resources/whatsapp-button.js"></script>
+    <include src="waicon.html"></include>
+    <include src="floatingcart.html"></include>
+</body>
 </html>
