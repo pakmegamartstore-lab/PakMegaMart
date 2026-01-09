@@ -3,14 +3,16 @@
 
 (async function loadEnvironmentVariables() {
     // Prevent reloading if already loaded
-    if (window.ENV) {
+    if (window.ENV && Object.keys(window.ENV).length > 0) {
         return;
     }
 
     try {
         const response = await fetch('.env');
         if (!response.ok) {
-            throw new Error('Failed to fetch .env file');
+            console.warn('⚠️ .env file not found. Using fallback configuration.');
+            window.ENV = {};
+            return;
         }
 
         const envContent = await response.text();
@@ -37,14 +39,16 @@
         
         // Make environment variables globally accessible
         window.ENV = env;
+        console.log('✅ Environment variables loaded successfully');
     } catch (error) {
-        window.ENV = {}; // Ensure ENV is an object
+        console.warn('⚠️ Failed to load .env file:', error.message);
+        window.ENV = window.ENV || {}; // Ensure ENV is an object
     }
 })();
 
 // Function to get environment variable with fallback
 function getEnv(key, defaultValue = null) {
-    if (window.ENV && typeof window.ENV[key] !== 'undefined') {
+    if (window.ENV && typeof window.ENV[key] !== 'undefined' && window.ENV[key] !== '') {
         return window.ENV[key];
     }
     if (defaultValue !== null) {
@@ -55,4 +59,5 @@ function getEnv(key, defaultValue = null) {
 
 // Export for global use
 window.getEnv = getEnv;
+console.log('✅ Config loader initialized');
 

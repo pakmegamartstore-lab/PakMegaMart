@@ -4,16 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - PakMegaMart</title>
+    <!-- Tailwind CSS (Warning about CDN is normal for development - will be replaced in production) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Suppress Tailwind CDN warning in development
+        if (window.tailwind) {
+            window.tailwind.config = { darkMode: 'class' };
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link href="resources/whatsapp-button.css" rel="stylesheet">
     <link href="resources/floating-buttons.css" rel="stylesheet">
+    <!-- EmailJS Library for Email Notifications -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config-loader.js"></script>
     <script src="supabase.js"></script>
     <script src="resources/component-loader.js"></script>
     <script src="resources/cart-manager.js"></script>
+    <!-- EmailJS Configuration and Checkout Handler -->
+    <script src="emailjs-config.js"></script>
+    <script src="checkout-handler.js"></script>
     
     <style>
         :root {
@@ -484,6 +496,9 @@
             const summaryItems = document.getElementById('checkoutSummaryItems');
             summaryItems.innerHTML = '';
 
+            // Get cart from localStorage
+            const cart = JSON.parse(localStorage.getItem('pakMegaMartCart')) || [];
+
             if (cart.length === 0) {
                 summaryItems.innerHTML = '<p class="text-gray-600 text-sm">No items in cart</p>';
                 updateTotals();
@@ -500,7 +515,7 @@
                 itemDiv.innerHTML = `
                     <div class="flex-1">
                         <p class="font-medium text-gray-900 text-sm">${item.name}</p>
-                        <p class="text-xs text-gray-600">Color: ${item.color} | Qty: ${item.quantity}</p>
+                        <p class="text-xs text-gray-600">Color: ${item.color || 'N/A'} | Qty: ${item.quantity}</p>
                     </div>
                     <p class="font-medium text-gray-900">PKR ${itemTotal.toLocaleString()}</p>
                 `;
@@ -719,58 +734,29 @@
                     return;
                 }
 
-                // Get form data
-                const firstName = document.getElementById('firstName').value;
-                const lastName = document.getElementById('lastName').value;
-                const email = document.getElementById('email').value;
-                const phone = document.getElementById('phone').value;
-                const address = document.getElementById('address').value;
-                const city = document.getElementById('city').value;
-                const state = document.getElementById('state').value;
-                const zipCode = document.getElementById('zipCode').value;
-                const country = document.getElementById('country').value;
-                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-                // Calculate totals
-                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const shippingCost = 160;
-                const total = subtotal + shippingCost;
-
-                // Prepare order data for Supabase
-                const orderData = {
-                    first_name: firstName,
-                    last_name: lastName,
-                    email: email,
-                    phone: phone,
-                    address: address,
-                    city: city,
-                    state: state,
-                    zip_code: zipCode,
-                    country: country,
-                    payment_method: paymentMethod,
-                    subtotal: subtotal,
-                    shipping_cost: shippingCost,
-                    total: total,
-                    items: cart,
-                    notes: null
-                };
-
-                // Save to Supabase
-                let savedOrder = null;
-                if (typeof supabaseDB !== 'undefined' && supabaseDB.createCompleteOrder) {
-                    savedOrder = await supabaseDB.createCompleteOrder(orderData);
-                    console.log('Order saved to Supabase:', savedOrder);
-                } else {
-                    console.warn('Supabase not available, creating local order');
+                // Use the checkout-handler function to process the order
+                if (typeof window.processCheckout === 'undefined') {
+                    throw new Error('Checkout handler not loaded');
                 }
-
-                // Generate order number (use Supabase order number if available)
-                const orderNumber = savedOrder?.order_number || '#' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                console.log('📦 Processing order through checkout handler...');
+                const result = await window.processCheckout();
+                
+                if (!result.success) {
+                    alert('❌ Error: ' + result.error);
+                    nextBtn.innerHTML = originalText;
+                    nextBtn.disabled = false;
+                    return;
+                }
+                
+                console.log('✅ Order processed successfully:', result.orderNumber);
+                
+                // Show success modal with order details
                 const deliveryDate = new Date();
-                deliveryDate.setDate(deliveryDate.getDate() + 5);
+                deliveryDate.setDate(deliveryDate.getDate() + 7); // 7 days delivery
 
-                document.getElementById('orderNumber').textContent = orderNumber;
-                document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString('en-US', {
+                document.getElementById('orderNumber').textContent = result.orderNumber;
+                document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString('en-PK', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric'
@@ -779,14 +765,16 @@
                 // Show success modal
                 document.getElementById('successModal').classList.remove('hidden');
 
-                // Clear cart and checkout data after 2 seconds
+                // Clear cart and redirect after delay
                 setTimeout(() => {
                     localStorage.removeItem('pakMegaMartCart');
                     localStorage.removeItem('checkoutData');
-                    // Redirect home after 3 seconds
+                    localStorage.setItem('lastOrderNumber', result.orderNumber);
+                    
+                    // Redirect home after another 2 seconds
                     setTimeout(() => {
                         window.location.href = 'index.html';
-                    }, 3000);
+                    }, 2000);
                 }, 2000);
             } catch (error) {
                 console.error('Error completing order:', error);

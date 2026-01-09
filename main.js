@@ -797,6 +797,13 @@ window.checkout = checkout;
 class PremiumNavbar {
     constructor() {
         this.navbar = document.getElementById('navbar');
+        
+        // Skip initialization if navbar doesn't exist (e.g., on checkout page)
+        if (!this.navbar) {
+            console.info('ℹ️  Navbar element not found - skipping navbar initialization (not on this page)');
+            return;
+        }
+        
         this.lastScrollY = 0;
         this.currentScrollY = 0;
         this.scrollDirection = 'up';
@@ -873,6 +880,8 @@ class PremiumNavbar {
     updateNavbarVisibility() {
         // Scrolling down: hide navbar (except when at top)
         // Scrolling up: show navbar
+        if (!this.navbar) return; // Navbar not available on this page
+        
         const shouldHide = this.scrollDirection === 'down' && this.currentScrollY > 100;
         
         if (shouldHide && this.isNavbarVisible) {

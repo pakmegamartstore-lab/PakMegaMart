@@ -6,12 +6,12 @@ function initializeCartManager() {
     const cartCountElement = document.querySelector('.cart-count');
 
     if (!cartCountElement) {
-        console.warn('Cart count element not found, retrying...');
-        setTimeout(initializeCartManager, 200);
+        console.info('ℹ️  Cart count element not found - continuing without it (may not be on this page)');
+        // Don't retry indefinitely - just continue without cart count updates
         return;
     }
 
-    console.log('Cart manager initialized');
+    console.log('✅ Cart manager initialized');
 
     // Function to calculate total item quantity in cart
     function getTotalItemsFromStorage() {

@@ -3,6 +3,27 @@
 // Loads credentials from environment variables (.env file)
 
 let supabaseClient = null;
+let SUPABASE_INIT_ATTEMPTS = 0;
+const MAX_SUPABASE_INIT_ATTEMPTS = 10;
+
+// Wait for environment variables to be loaded
+function waitForEnvironmentVariables() {
+    return new Promise((resolve) => {
+        let attempts = 0;
+        const checkEnv = () => {
+            if (window.ENV && Object.keys(window.ENV).length > 0) {
+                resolve();
+            } else if (attempts < 20) {
+                attempts++;
+                setTimeout(checkEnv, 100);
+            } else {
+                console.warn('⚠️  Environment variables did not load within timeout');
+                resolve();
+            }
+        };
+        checkEnv();
+    });
+}
 
 // Initialize Supabase client using environment variables
 function initSupabaseConnection() {
@@ -12,52 +33,53 @@ function initSupabaseConnection() {
     
     if (!supabaseUrl || !supabaseAnonKey) {
         console.error('❌ Supabase configuration is incomplete.');
-        console.error('Required: SUPABASE_URL, SUPABASE_ANON_KEY');
+        console.error('   Required: SUPABASE_URL =', supabaseUrl ? '✅' : '❌');
+        console.error('   Required: SUPABASE_ANON_KEY =', supabaseAnonKey ? '✅' : '❌');
+        console.warn('ℹ️  Supabase will not be available. Database operations will be skipped.');
         // Return null but don't block page load
         return null;
     }
     
     try {
+        if (typeof supabase === 'undefined') {
+            console.error('❌ Supabase library not loaded');
+            return null;
+        }
+        
         const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        console.log('✅ Supabase client initialized successfully');
+        console.log('   URL:', supabaseUrl.substring(0, 30) + '...');
         return client;
     } catch (error) {
-        console.error('❌ Failed to initialize Supabase client:', error);
+        console.error('❌ Failed to initialize Supabase client:', error.message);
         return null;
     }
 }
 
-// Wait for Supabase to be loaded
+// Wait for Supabase library to be loaded
 function waitForSupabase() {
     return new Promise((resolve) => {
-        const interval = setInterval(() => {
+        const checkSupabase = () => {
             if (typeof supabase !== 'undefined') {
-                clearInterval(interval);
+                resolve();
+            } else if (SUPABASE_INIT_ATTEMPTS < MAX_SUPABASE_INIT_ATTEMPTS) {
+                SUPABASE_INIT_ATTEMPTS++;
+                setTimeout(checkSupabase, 200);
+            } else {
+                console.warn('⚠️  Supabase library did not load within timeout');
                 resolve();
             }
-        }, 100);
-        // Timeout after 5 seconds to prevent infinite waiting
-        setTimeout(() => {
-            clearInterval(interval);
-            resolve();
-        }, 5000);
+        };
+        checkSupabase();
     });
 }
 
-// Initialize Supabase immediately when script loads
-waitForSupabase().then(() => {
+// Initialize Supabase when everything is ready
+window.addEventListener('load', async () => {
+    console.log('🔍 Checking for Supabase library...');
+    await waitForEnvironmentVariables();
+    await waitForSupabase();
     supabaseClient = initSupabaseConnection();
-    if (supabaseClient) {
-        console.log('✅ Supabase client initialized successfully');
-    }
-});
-
-// Also ensure it's initialized on load event
-window.addEventListener('load', () => {
-    if (!supabaseClient) {
-        waitForSupabase().then(() => {
-            supabaseClient = initSupabaseConnection();
-        });
-    }
 });
 
 // ==========================================
@@ -66,7 +88,10 @@ window.addEventListener('load', () => {
 
 async function fetchProducts() {
     try {
-        if (!supabaseClient) throw new Error('Supabase client not initialized');
+        if (!supabaseClient) {
+            console.warn('⚠️  Supabase not available, skipping product fetch');
+            return [];
+        }
         const { data, error } = await supabaseClient
             .from('products')
             .select('*');
@@ -81,7 +106,10 @@ async function fetchProducts() {
 
 async function getProductById(id) {
     try {
-        if (!supabaseClient) throw new Error('Supabase client not initialized');
+        if (!supabaseClient) {
+            console.warn('⚠️  Supabase not available, skipping product fetch');
+            return null;
+        }
         const { data, error } = await supabaseClient
             .from('products')
             .select('*')

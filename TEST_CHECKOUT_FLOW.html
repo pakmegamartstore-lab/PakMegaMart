@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Flow Test - PakMegaMart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-result { margin: 1rem 0; padding: 1rem; border-radius: 0.5rem; }
+        .test-pass { background-color: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; }
+        .test-fail { background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+        .test-pending { background-color: #fef3c7; border: 1px solid #fde68a; color: #92400e; }
+        .console-output { background-color: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; font-family: monospace; max-height: 400px; overflow-y: auto; }
+        .code-block { background-color: #f3f4f6; padding: 1rem; border-radius: 0.5rem; font-family: monospace; overflow-x: auto; }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold mb-2">🧪 Checkout Flow Test Suite</h1>
+        <p class="text-gray-600 mb-8">Comprehensive validation of email, form, and checkout functionality</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+                <h2 class="text-2xl font-bold mb-4">Test Categories</h2>
+                <button onclick="testEnvironmentVariables()" class="w-full mb-2 px-4 py-2 bg-blue-500 text-white rounded">
+                    1. Environment Variables
+                </button>
+                <button onclick="testEmailJSConfig()" class="w-full mb-2 px-4 py-2 bg-blue-500 text-white rounded">
+                    2. EmailJS Configuration
+                </button>
+                <button onclick="testSupabaseConfig()" class="w-full mb-2 px-4 py-2 bg-blue-500 text-white rounded">
+                    3. Supabase Configuration
+                </button>
+                <button onclick="testFormValidation()" class="w-full mb-2 px-4 py-2 bg-blue-500 text-white rounded">
+                    4. Form Validation
+                </button>
+                <button onclick="testCheckoutHandler()" class="w-full mb-2 px-4 py-2 bg-blue-500 text-white rounded">
+                    5. Checkout Handler
+                </button>
+                <button onclick="runAllTests()" class="w-full px-4 py-2 bg-green-500 text-white rounded font-bold">
+                    ▶️ Run All Tests
+                </button>
+            </div>
+            <div id="testStatus" class="p-4 bg-white rounded border border-gray-300">
+                <h3 class="font-bold mb-2">Test Status</h3>
+                <p id="statusText" class="text-gray-600">Ready to run tests</p>
+                <div id="progressBar" style="width: 0%; height: 20px; background-color: #3b82f6; border-radius: 0.25rem; margin-top: 1rem; transition: width 0.3s;"></div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold mb-4">Test Results</h2>
+        <div id="results" class="space-y-3">
+            <p class="text-gray-600 text-center py-8">Click a test button to run tests</p>
+        </div>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4">Console Output</h2>
+        <div id="consoleOutput" class="console-output">
+            <p style="color: #9ca3af;">> Console output will appear here</p>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let totalTests = 0;
+        let passedTests = 0;
+
+        // ==========================================
+        // Utility Functions
+        // ==========================================
+
+        function addTest(name, status, details = '') {
+            testResults.push({ name, status, details });
+            updateUI();
+            logToConsole(`${status === 'pass' ? '✅' : status === 'fail' ? '❌' : '⚠️'} ${name}: ${details}`);
+        }
+
+        function updateUI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            testResults.forEach((result, index) => {
+                const div = document.createElement('div');
+                div.className = `test-result ${result.status === 'pass' ? 'test-pass' : result.status === 'fail' ? 'test-fail' : 'test-pending'}`;
+                div.innerHTML = `
+                    <strong>${index + 1}. ${result.name}</strong><br>
+                    <span class="text-sm">${result.details}</span>
+                `;
+                resultsDiv.appendChild(div);
+            });
+
+            // Update progress
+            passedTests = testResults.filter(r => r.status === 'pass').length;
+            const progressPercent = totalTests > 0 ? (passedTests / totalTests * 100) : 0;
+            document.getElementById('progressBar').style.width = progressPercent + '%';
+            document.getElementById('statusText').textContent = `${passedTests}/${totalTests} tests passed`;
+        }
+
+        function logToConsole(message) {
+            const consoleDiv = document.getElementById('consoleOutput');
+            const line = document.createElement('div');
+            line.textContent = message;
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            testResults = [];
+            totalTests = 0;
+            passedTests = 0;
+            document.getElementById('consoleOutput').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // ==========================================
+        // Test Functions
+        // ==========================================
+
+        async function testEnvironmentVariables() {
+            clearResults();
+            logToConsole('Starting environment variables test...\n');
+
+            totalTests = 3;
+            updateUI();
+
+            // Check if ENV is loaded
+            if (window.ENV && Object.keys(window.ENV).length > 0) {
+                addTest('ENV object loaded', 'pass', `${Object.keys(window.ENV).length} variables found`);
+            } else {
+                addTest('ENV object loaded', 'fail', 'No environment variables found');
+            }
+
+            // Check for getEnv function
+            if (typeof window.getEnv === 'function') {
+                addTest('getEnv() function available', 'pass', 'Function exists');
+            } else {
+                addTest('getEnv() function available', 'fail', 'Function not found');
+            }
+
+            // Check critical variables
+            const emailjsPublicKey = window.getEnv?.('EMAILJS_PUBLIC_KEY');
+            if (emailjsPublicKey) {
+                addTest('EmailJS public key found', 'pass', emailjsPublicKey.substring(0, 10) + '...');
+            } else {
+                addTest('EmailJS public key found', 'fail', 'Not found in .env');
+            }
+        }
+
+        async function testEmailJSConfig() {
+            clearResults();
+            logToConsole('Starting EmailJS configuration test...\n');
+
+            totalTests = 4;
+            updateUI();
+
+            // Check if EmailJS loaded
+            if (typeof emailjs !== 'undefined') {
+                addTest('EmailJS library loaded', 'pass', 'emailjs object available');
+            } else {
+                addTest('EmailJS library loaded', 'fail', 'emailjs not defined');
+                return;
+            }
+
+            // Check if config object exists
+            if (typeof EMAILJS_CONFIG !== 'undefined' && EMAILJS_CONFIG) {
+                addTest('EMAILJS_CONFIG initialized', 'pass', `Service ID: ${EMAILJS_CONFIG.serviceID}`);
+            } else {
+                addTest('EMAILJS_CONFIG initialized', 'fail', 'EMAILJS_CONFIG is undefined');
+                return;
+            }
+
+            // Check if emailConfig object exists
+            if (typeof emailConfig !== 'undefined' && emailConfig) {
+                addTest('emailConfig helper object', 'pass', 'emailConfig available');
+            } else {
+                addTest('emailConfig helper object', 'fail', 'emailConfig not initialized');
+                return;
+            }
+
+            // Check templates
+            if (EMAILJS_CONFIG.templates?.customer && EMAILJS_CONFIG.templates?.admin) {
+                addTest('Email templates defined', 'pass', 
+                    `Customer: ${EMAILJS_CONFIG.templates.customer}, Admin: ${EMAILJS_CONFIG.templates.admin}`);
+            } else {
+                addTest('Email templates defined', 'fail', 'Templates missing');
+            }
+        }
+
+        async function testSupabaseConfig() {
+            clearResults();
+            logToConsole('Starting Supabase configuration test...\n');
+
+            totalTests = 3;
+            updateUI();
+
+            // Check if Supabase JS loaded
+            if (typeof supabase !== 'undefined') {
+                addTest('Supabase JS library loaded', 'pass', 'supabase object available');
+            } else {
+                addTest('Supabase JS library loaded', 'fail', 'supabase not defined');
+                return;
+            }
+
+            // Check URL
+            const supabaseUrl = window.getEnv?.('SUPABASE_URL');
+            if (supabaseUrl) {
+                addTest('Supabase URL found', 'pass', supabaseUrl.substring(0, 30) + '...');
+            } else {
+                addTest('Supabase URL found', 'fail', 'SUPABASE_URL not in .env');
+                return;
+            }
+
+            // Check if client initialized
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                addTest('Supabase client initialized', 'pass', 'supabaseClient available');
+            } else {
+                addTest('Supabase client initialized', 'fail', 'supabaseClient not defined');
+            }
+        }
+
+        async function testFormValidation() {
+            clearResults();
+            logToConsole('Starting form validation test...\n');
+
+            totalTests = 5;
+            updateUI();
+
+            // Check if validation function exists
+            if (typeof validateFormData === 'function') {
+                addTest('validateFormData function', 'pass', 'Function loaded');
+            } else {
+                addTest('validateFormData function', 'fail', 'Function not found');
+                return;
+            }
+
+            // Test empty form validation
+            const emptyErrors = validateFormData({});
+            if (emptyErrors.length > 0) {
+                addTest('Empty form validation', 'pass', `${emptyErrors.length} errors caught`);
+            } else {
+                addTest('Empty form validation', 'fail', 'No errors returned');
+            }
+
+            // Test email validation
+            const badEmail = validateFormData({
+                customerName: 'John Doe',
+                customerEmail: 'invalid-email',
+                customerPhone: '03001234567',
+                deliveryAddress: '123 Main St',
+                city: 'Lahore',
+                postalCode: '54000'
+            });
+            if (badEmail.some(e => e.includes('email'))) {
+                addTest('Email format validation', 'pass', 'Invalid email caught');
+            } else {
+                addTest('Email format validation', 'fail', 'Bad email not caught');
+            }
+
+            // Test phone validation
+            const badPhone = validateFormData({
+                customerName: 'John Doe',
+                customerEmail: 'john@example.com',
+                customerPhone: '123',
+                deliveryAddress: '123 Main St',
+                city: 'Lahore',
+                postalCode: '54000'
+            });
+            if (badPhone.some(e => e.includes('Phone'))) {
+                addTest('Phone validation', 'pass', 'Short phone caught');
+            } else {
+                addTest('Phone validation', 'fail', 'Bad phone not caught');
+            }
+
+            // Test valid form
+            const validErrors = validateFormData({
+                customerName: 'John Doe',
+                customerEmail: 'john@example.com',
+                customerPhone: '03001234567',
+                deliveryAddress: '123 Main St',
+                city: 'Lahore',
+                postalCode: '54000'
+            });
+            if (validErrors.length === 0) {
+                addTest('Valid form acceptance', 'pass', 'All validations passed');
+            } else {
+                addTest('Valid form acceptance', 'fail', 'Valid form rejected: ' + validErrors.join(', '));
+            }
+        }
+
+        async function testCheckoutHandler() {
+            clearResults();
+            logToConsole('Starting checkout handler test...\n');
+
+            totalTests = 3;
+            updateUI();
+
+            // Check if handler functions exist
+            if (typeof window.processCheckout === 'function') {
+                addTest('processCheckout function', 'pass', 'Function available');
+            } else {
+                addTest('processCheckout function', 'fail', 'Function not defined');
+                return;
+            }
+
+            if (typeof window.generateOrderNumber === 'function') {
+                addTest('generateOrderNumber function', 'pass', 'Function available');
+                const orderId = window.generateOrderNumber();
+                logToConsole(`Generated sample order ID: ${orderId}`);
+            } else {
+                addTest('generateOrderNumber function', 'fail', 'Function not defined');
+            }
+
+            if (typeof window.getFormDataFromCheckout === 'function') {
+                addTest('getFormDataFromCheckout function', 'pass', 'Function available');
+            } else {
+                addTest('getFormDataFromCheckout function', 'fail', 'Function not defined');
+            }
+        }
+
+        async function runAllTests() {
+            clearResults();
+            logToConsole('Running complete test suite...\n');
+
+            await testEnvironmentVariables();
+            await new Promise(r => setTimeout(r, 500));
+            await testEmailJSConfig();
+            await new Promise(r => setTimeout(r, 500));
+            await testSupabaseConfig();
+            await new Promise(r => setTimeout(r, 500));
+            await testFormValidation();
+            await new Promise(r => setTimeout(r, 500));
+            await testCheckoutHandler();
+
+            logToConsole('\n✅ All test categories completed');
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            logToConsole('Page loaded, waiting for scripts to initialize...');
+            setTimeout(() => {
+                logToConsole('Ready. Click "Run All Tests" or individual test buttons.');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

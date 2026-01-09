@@ -27,15 +27,17 @@ function generateOrderNumber() {
     return `ORD-${random}-${timestamp.toString().slice(-6)}`;
 }
 
-// Get form data as an object
-function getFormData() {
+// Get form data from checkout.html fields
+function getFormDataFromCheckout() {
     const formData = {
-        customerName: document.getElementById('customerName')?.value,
-        customerEmail: document.getElementById('customerEmail')?.value,
-        customerPhone: document.getElementById('customerPhone')?.value,
-        deliveryAddress: document.getElementById('deliveryAddress')?.value,
+        customerName: (document.getElementById('firstName')?.value || '') + ' ' + (document.getElementById('lastName')?.value || ''),
+        customerEmail: document.getElementById('email')?.value,
+        customerPhone: document.getElementById('phone')?.value,
+        deliveryAddress: document.getElementById('address')?.value,
         city: document.getElementById('city')?.value,
-        postalCode: document.getElementById('postalCode')?.value,
+        state: document.getElementById('state')?.value,
+        postalCode: document.getElementById('zipCode')?.value,
+        country: document.getElementById('country')?.value,
     };
     return formData;
 }
@@ -43,38 +45,54 @@ function getFormData() {
 // Validate form data
 function validateFormData(data) {
     const errors = [];
-    if (!data.customerName) errors.push('Customer name is required.');
+    if (!data.customerName || data.customerName.trim() === ' ') errors.push('Name is required.');
     if (!data.customerEmail) errors.push('Email is required.');
     if (!data.customerPhone) errors.push('Phone number is required.');
     if (!data.deliveryAddress) errors.push('Delivery address is required.');
     if (!data.city) errors.push('City is required.');
     if (!data.postalCode) errors.push('Postal code is required.');
+    
+    // Email validation
+    if (data.customerEmail) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.customerEmail)) {
+            errors.push('Invalid email format.');
+        }
+    }
+    
+    // Phone validation
+    if (data.customerPhone) {
+        const phoneDigits = data.customerPhone.replace(/\D/g, '');
+        if (phoneDigits.length < 10) {
+            errors.push('Phone number must be at least 10 digits.');
+        }
+    }
+    
     return errors;
 }
 
 // ==========================================
-// Main Checkout Process
+// Main Checkout Process (called from checkout.html completeOrder)
 // ==========================================
 async function processCheckout() {
     try {
         // 1. Get and validate form data
-        const formData = getFormData();
+        const formData = getFormDataFromCheckout();
         const validationErrors = validateFormData(formData);
         if (validationErrors.length > 0) {
-            alert(`Please correct the following errors:\n- ${validationErrors.join('\n- ')}`);
-            return false;
+            console.error('Validation errors:', validationErrors);
+            return { success: false, error: validationErrors.join('\n') };
         }
 
         // 2. Get cart data
         const cart = JSON.parse(localStorage.getItem('pakMegaMartCart') || '[]');
         if (cart.length === 0) {
-            alert('❌ Your cart is empty');
-            return false;
+            return { success: false, error: 'Your cart is empty' };
         }
 
         // 3. Calculate totals
         const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const shippingCost = parseInt(getEnv('SHIPPING_COST_DEFAULT', '500'));
+        const shippingCost = 160; // Fixed shipping cost
         const total = subtotal + shippingCost;
 
         // 4. Generate order number and prepare data
@@ -82,68 +100,80 @@ async function processCheckout() {
         const orderData = {
             order_number: orderNumber,
             customer_email: formData.customerEmail,
-            customer_name: formData.customerName,
+            customer_name: formData.customerName.trim(),
             customer_phone: formData.customerPhone,
             delivery_address: formData.deliveryAddress,
             city: formData.city,
+            state: formData.state,
             postal_code: formData.postalCode,
+            country: formData.country,
             items: cart,
             subtotal,
             shipping_cost: shippingCost,
             total,
-            payment_method: 'Cash on Delivery',
+            payment_method: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod',
             payment_status: 'pending',
             status: 'pending',
             created_at: new Date().toISOString()
         };
 
-        // 6. Save to Supabase
+        console.log('📦 Order prepared:', orderNumber);
+
+        // 5. Save to Supabase
         let orderSaved = false;
-        if (supabaseClient) {
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
             try {
-                const { data, error } = await supabaseClient.from('orders').insert([orderData]);
+                console.log('💾 Saving order to Supabase...');
+                const { data, error } = await supabaseClient
+                    .from('orders')
+                    .insert([orderData]);
+                
                 if (error) {
-                    console.error('Database error:', error.message);
-                    // Order may still proceed with email confirmation
+                    console.warn('⚠️  Supabase save warning:', error.message);
+                    // Don't fail - continue with email
                 } else {
                     orderSaved = true;
+                    console.log('✅ Order saved to Supabase');
                 }
             } catch (e) {
-                console.error('Failed to save order:', e);
-                // Continue with email notification even if DB fails
+                console.warn('⚠️  Failed to save order to database:', e.message);
             }
+        } else {
+            console.warn('⚠️  Supabase not available, skipping database save');
         }
 
-        // 7. Send emails
+        // 6. Send emails
         let emailsSent = false;
-        if (EMAILJS_CONFIG && emailConfig) {
+        if (typeof emailConfig !== 'undefined' && emailConfig && EMAILJS_CONFIG) {
             try {
+                console.log('📧 Sending emails...');
                 await emailConfig.sendCustomerOrderConfirmationEmail(orderData);
+                console.log('✅ Customer email sent');
+                
                 await emailConfig.sendAdminOrderReceivedEmail(orderData);
+                console.log('✅ Admin email sent');
+                
                 emailsSent = true;
             } catch (e) {
-                console.error('Email sending failed:', e.message);
+                console.error('❌ Email sending failed:', e.message);
+                // Don't fail checkout - emails are secondary
             }
+        } else {
+            console.warn('⚠️  EmailJS not available, skipping email send');
         }
         
-        // 8. Clear cart
-        localStorage.removeItem('pakMegaMartCart');
-
-        // 9. Show success and redirect
-        alert(`✅ Order placed successfully!\n\nOrder Number: ${orderNumber}\n\nWe'll send you a confirmation email shortly.`);
-        
-        // Redirect safely without URL manipulation vulnerability
-        localStorage.setItem('lastOrderNumber', orderNumber);
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000);
-
-        return true;
+        // 7. Success response
+        return {
+            success: true,
+            orderNumber: orderNumber,
+            message: 'Order placed successfully!',
+            database: orderSaved,
+            email: emailsSent
+        };
 
     } catch (error) {
         console.error('❌ Checkout error:', error);
-        alert('❌ Checkout failed. Please try again.');
-        return false;
+        return { success: false, error: error.message || 'An error occurred during checkout' };
     }
 }
 
@@ -153,28 +183,12 @@ async function processCheckout() {
 async function initCheckout() {
     console.log('🔍 Initializing checkout page...');
 
-    // Wait for the environment to be loaded
+    // Wait for environment to be loaded
     if (!window.ENV) {
         await new Promise(resolve => setTimeout(resolve, 300));
     }
-     console.log('✅ Environment loaded');
-
-    // Wait for Supabase and EmailJS clients
-    if (!supabaseClient) console.log('⏳ Waiting for Supabase...');
-    if (!EMAILJS_CONFIG) console.log('⏳ Waiting for EmailJS...');
-
-    // Attach event listener to the final checkout button
-    const finalStepButton = '#submitOrderBtn, #nextBtn';
-    waitForElements([finalStepButton]).then(([submitButton]) => {
-        submitButton.addEventListener('click', (e) => {
-            // Check if it's the final step (simple check for now)
-            if (submitButton.innerText.toLowerCase().includes('complete')) {
-                e.preventDefault();
-                processCheckout();
-            }
-        });
-        console.log('✅ Checkout button event listener attached.');
-    });
+    
+    console.log('✅ Checkout handler initialized and ready');
 }
 
 // Initialize when DOM is ready
@@ -183,5 +197,6 @@ document.addEventListener('DOMContentLoaded', initCheckout);
 // Export for global use
 window.processCheckout = processCheckout;
 window.generateOrderNumber = generateOrderNumber;
+window.getFormDataFromCheckout = getFormDataFromCheckout;
 
-console.log('✅ Checkout handler loaded');
+console.log('✅ Checkout handler loaded successfully');
